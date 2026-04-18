@@ -17,6 +17,7 @@ header .sp{flex:1}
 .btn-primary{background:var(--acc);color:#0c0e13;border:none;border-radius:var(--r8);padding:7px 16px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:.01em}
 .btn-primary:hover{opacity:.88}
 .btn-primary:active{transform:scale(.97)}
+#btnMobilePreview{display:none}
 .main{display:grid;grid-template-columns:340px 1fr;overflow:hidden}
 /* LEFT */
 .left{border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
@@ -189,6 +190,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     border-top:1px solid var(--bd);
     z-index:100;
   }
+  #btnMobilePreview{display:inline-flex}
   .mob-nav-btn{
     flex:1;
     background:none;
@@ -226,8 +228,96 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
   .og{ grid-template-columns:repeat(8,1fr); }
 }
 
+
+/* ── LANG PICKER ──────────────────────────────── */
+.lang-pick{display:flex;gap:2px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);padding:3px;margin-right:4px}
+.lang-btn{background:none;border:none;border-radius:6px;padding:3px 7px;font-family:inherit;font-size:10px;font-weight:600;color:var(--txm);cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.lang-btn:hover{color:var(--tx)}
+.lang-btn.on{background:var(--s1);color:var(--acc)}
+
 /* Hide mob-nav on desktop */
 .mob-nav{ display:none; }
+
+
+/* ── ONBOARDING CARD ─────────────────────── */
+.onb{
+  background:linear-gradient(135deg,#1c2035,#1a1c2a);
+  border:1px solid var(--acc3);
+  border-radius:var(--r12);
+  overflow:hidden;
+  flex-shrink:0;
+}
+.onb-h{
+  display:flex;
+  align-items:center;
+  padding:11px 13px;
+  cursor:pointer;
+  user-select:none;
+  gap:8px;
+}
+.onb-icon{
+  width:22px;height:22px;
+  background:var(--acc2);
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.onb-title{
+  font-size:11px;
+  font-weight:600;
+  color:var(--acc);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  flex:1;
+}
+.onb-chev{
+  transition:transform .2s;
+  flex-shrink:0;
+  color:var(--txm);
+}
+.onb.open .onb-chev{ transform:rotate(180deg); }
+.onb.open .onb-h{ border-bottom:1px solid var(--acc3); }
+.onb-body{
+  display:none;
+  padding:13px;
+  flex-direction:column;
+  gap:10px;
+}
+.onb.open .onb-body{ display:flex; }
+.step{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.step-num{
+  width:20px;height:20px;
+  background:var(--acc);
+  color:#0c0e13;
+  border-radius:50%;
+  font-size:10px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.step-body{ display:flex;flex-direction:column;gap:2px; }
+.step-title{ font-size:12px;font-weight:600;color:var(--tx); }
+.step-desc{ font-size:11px;color:var(--txm);line-height:1.5; }
+.step-link{
+  font-size:11px;
+  color:var(--acc);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  margin-top:2px;
+}
+.step-link:hover{ opacity:.8; }
+.onb-div{ height:1px;background:var(--acc3);margin:0 -1px; }
 </style>
 </head>
 <body>
@@ -235,9 +325,19 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <header>
   <div class="logo"><div class="logo-dot"></div>Widget Builder <span class="logo-sub">Dagelijkse Tekst</span></div>
   <div class="sp"></div>
+  <div class="lang-pick">
+    <button class="lang-btn" onclick="setLang('nl')" id="lb-nl">NL</button>
+    <button class="lang-btn on" onclick="setLang('en')" id="lb-en">EN</button>
+    <button class="lang-btn" onclick="setLang('es')" id="lb-es">ES</button>
+    <button class="lang-btn" onclick="setLang('de')" id="lb-de">DE</button>
+  </div>
+  <button class="btn-primary" id="btnMobilePreview" onclick="toggleMobilePreview()">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M3 7h18v11H3z"/><path d="M8 17l4-4 4 4"/></svg>
+    <span id="btnMobilePreviewLabel" data-i18n="btn_preview">Preview</span>
+  </button>
   <button class="btn-primary" id="btnExport" onclick="doExport()">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Exporteer Script
+    <span data-i18n="btn_export">Export Script</span>
   </button>
 </header>
 
@@ -245,19 +345,67 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <!-- LEFT PANEL -->
 <div class="left">
   <div class="tabs">
-    <button class="tab on" onclick="sw('themes',this)">Thema&apos;s</button>
-    <button class="tab" onclick="sw('colors',this)">Kleuren</button>
-    <button class="tab" onclick="sw('type',this)">Tekst</button>
-    <button class="tab" onclick="sw('orn',this)">Ornament</button>
-    <button class="tab" onclick="sw('misc',this)">Overig</button>
+    <button class="tab on" onclick="sw('themes',this)" data-i18n="tab_themes">Themes</button>
+    <button class="tab" onclick="sw('colors',this)" data-i18n="tab_colors">Colors</button>
+    <button class="tab" onclick="sw('type',this)" data-i18n="tab_type">Text</button>
+    <button class="tab" onclick="sw('orn',this)" data-i18n="tab_orn">Ornament</button>
+    <button class="tab" onclick="sw('misc',this)" data-i18n="tab_misc">Other</button>
   </div>
 
   <div class="scroll">
 
+    <!-- ONBOARDING CARD -->
+    <div class="onb open" id="onbCard">
+      <div class="onb-h" onclick="this.parentElement.classList.toggle('open')">
+        <div class="onb-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c8a255" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <span class="onb-title" data-i18n="onb_title">How does this work?</span>
+        <svg class="onb-chev" width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="onb-body">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <span class="step-title" data-i18n="step1_title">Download Scriptable</span>
+            <span class="step-desc" data-i18n="step1_desc">Install the free Scriptable app on your iPhone or iPad via the App Store.</span>
+            <a class="step-link" href="https://apps.apple.com/app/scriptable/id1405459188" target="_blank">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              App Store → Scriptable
+            </a>
+          </div>
+        </div>
+        <div class="onb-div"></div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <span class="step-title" data-i18n="step2_title">Customize the theme</span>
+            <span class="step-desc" data-i18n="step2_desc">Choose a theme or set colors, font and ornament via the tabs on the left.</span>
+          </div>
+        </div>
+        <div class="onb-div"></div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <span class="step-title" data-i18n="step3_title">Export the script</span>
+            <span class="step-desc" data-i18n="step3_desc">Click <strong style="color:var(--acc)">Export Script</strong> above to download the .js file, or copy the code via the Script tab.</span>
+          </div>
+        </div>
+        <div class="onb-div"></div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <span class="step-title" data-i18n="step4_title">Paste in Scriptable</span>
+            <span class="step-desc" data-i18n="step4_desc">Open Scriptable on your iPhone → tap <strong style="color:var(--tx)">+</strong> → paste the copied code → save. Then add a Scriptable widget to your home screen and choose this script.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- THEMES PANEL -->
     <div class="panel on" id="pan-themes">
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Preset thema's <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_themes">Preset themes</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b"><div class="tg" id="themeGrid"></div></div>
       </div>
     </div>
@@ -267,53 +415,53 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       <div class="mt">
         <button class="mb on" id="cml" onclick="setCM('light')">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          Licht modus
+          <span data-i18n="btn_lightmode">Light mode</span>
         </button>
         <button class="mb" id="cmd" onclick="setCM('dark')">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          Donker modus
+          <span data-i18n="btn_darkmode">Dark mode</span>
         </button>
       </div>
 
       <div class="sec on" id="cpLight">
-        <div class="sec-h" onclick="tgl(this)">Licht — achtergrond <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_light_bg">Light — background</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
           <div class="row2">
-            <div class="cf"><label class="fl">Boven (bg1)</label><div class="cw" onclick="pc('lbg1')"><div class="cs" id="sw-lbg1"><input type="color" id="cp-lbg1" oninput="ci('light','bg1',this.value)"></div><input class="ch" id="hx-lbg1" maxlength="7" oninput="hx('light','bg1',this.value)"></div></div>
-            <div class="cf"><label class="fl">Onder (bg2)</label><div class="cw" onclick="pc('lbg2')"><div class="cs" id="sw-lbg2"><input type="color" id="cp-lbg2" oninput="ci('light','bg2',this.value)"></div><input class="ch" id="hx-lbg2" maxlength="7" oninput="hx('light','bg2',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_top">Top (bg1)</label><div class="cw" onclick="pc('lbg1')"><div class="cs" id="sw-lbg1"><input type="color" id="cp-lbg1" oninput="ci('light','bg1',this.value)"></div><input class="ch" id="hx-lbg1" maxlength="7" oninput="hx('light','bg1',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_bottom">Bottom (bg2)</label><div class="cw" onclick="pc('lbg2')"><div class="cs" id="sw-lbg2"><input type="color" id="cp-lbg2" oninput="ci('light','bg2',this.value)"></div><input class="ch" id="hx-lbg2" maxlength="7" oninput="hx('light','bg2',this.value)"></div></div>
           </div>
           <div class="gpb" id="gpbl"></div>
           <div class="row2">
-            <div class="cf"><label class="fl">Tekst</label><div class="cw" onclick="pc('ltx')"><div class="cs" id="sw-ltx"><input type="color" id="cp-ltx" oninput="ci('light','text',this.value)"></div><input class="ch" id="hx-ltx" maxlength="7" oninput="hx('light','text',this.value)"></div></div>
-            <div class="cf"><label class="fl">Ornament</label><div class="cw" onclick="pc('lorn')"><div class="cs" id="sw-lorn"><input type="color" id="cp-lorn" oninput="ci('light','ornament',this.value)"></div><input class="ch" id="hx-lorn" maxlength="7" oninput="hx('light','ornament',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_text">Text</label><div class="cw" onclick="pc('ltx')"><div class="cs" id="sw-ltx"><input type="color" id="cp-ltx" oninput="ci('light','text',this.value)"></div><input class="ch" id="hx-ltx" maxlength="7" oninput="hx('light','text',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_ornament">Ornament</label><div class="cw" onclick="pc('lorn')"><div class="cs" id="sw-lorn"><input type="color" id="cp-lorn" oninput="ci('light','ornament',this.value)"></div><input class="ch" id="hx-lorn" maxlength="7" oninput="hx('light','ornament',this.value)"></div></div>
           </div>
         </div>
       </div>
 
       <div class="sec on" id="cpDark">
-        <div class="sec-h" onclick="tgl(this)">Donker — achtergrond <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_dark_bg">Dark — background</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
           <div class="row2">
-            <div class="cf"><label class="fl">Boven (bg1)</label><div class="cw" onclick="pc('dbg1')"><div class="cs" id="sw-dbg1"><input type="color" id="cp-dbg1" oninput="ci('dark','bg1',this.value)"></div><input class="ch" id="hx-dbg1" maxlength="7" oninput="hx('dark','bg1',this.value)"></div></div>
-            <div class="cf"><label class="fl">Onder (bg2)</label><div class="cw" onclick="pc('dbg2')"><div class="cs" id="sw-dbg2"><input type="color" id="cp-dbg2" oninput="ci('dark','bg2',this.value)"></div><input class="ch" id="hx-dbg2" maxlength="7" oninput="hx('dark','bg2',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_top">Top (bg1)</label><div class="cw" onclick="pc('dbg1')"><div class="cs" id="sw-dbg1"><input type="color" id="cp-dbg1" oninput="ci('dark','bg1',this.value)"></div><input class="ch" id="hx-dbg1" maxlength="7" oninput="hx('dark','bg1',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_bottom">Bottom (bg2)</label><div class="cw" onclick="pc('dbg2')"><div class="cs" id="sw-dbg2"><input type="color" id="cp-dbg2" oninput="ci('dark','bg2',this.value)"></div><input class="ch" id="hx-dbg2" maxlength="7" oninput="hx('dark','bg2',this.value)"></div></div>
           </div>
           <div class="gpb" id="gpbd"></div>
           <div class="row2">
-            <div class="cf"><label class="fl">Tekst</label><div class="cw" onclick="pc('dtx')"><div class="cs" id="sw-dtx"><input type="color" id="cp-dtx" oninput="ci('dark','text',this.value)"></div><input class="ch" id="hx-dtx" maxlength="7" oninput="hx('dark','text',this.value)"></div></div>
-            <div class="cf"><label class="fl">Ornament</label><div class="cw" onclick="pc('dorn')"><div class="cs" id="sw-dorn"><input type="color" id="cp-dorn" oninput="ci('dark','ornament',this.value)"></div><input class="ch" id="hx-dorn" maxlength="7" oninput="hx('dark','ornament',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_text">Text</label><div class="cw" onclick="pc('dtx')"><div class="cs" id="sw-dtx"><input type="color" id="cp-dtx" oninput="ci('dark','text',this.value)"></div><input class="ch" id="hx-dtx" maxlength="7" oninput="hx('dark','text',this.value)"></div></div>
+            <div class="cf"><label class="fl" data-i18n="label_ornament">Ornament</label><div class="cw" onclick="pc('dorn')"><div class="cs" id="sw-dorn"><input type="color" id="cp-dorn" oninput="ci('dark','ornament',this.value)"></div><input class="ch" id="hx-dorn" maxlength="7" oninput="hx('dark','ornament',this.value)"></div></div>
           </div>
         </div>
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Verloop richting <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_grad">Gradient direction</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="f"><label>Richting</label>
+          <div class="f"><label data-i18n="label_dir">Direction</label>
             <select id="selGrad" onchange="S.grad=this.value;up();gen()">
-              <option value="tr">Diagonaal (links-boven → rechts-onder)</option>
-              <option value="b">Verticaal (boven → onder)</option>
-              <option value="r">Horizontaal (links → rechts)</option>
-              <option value="bl">Diagonaal (rechts-boven → links-onder)</option>
+              <option value="tr" data-i18n-opt="grad_tr">Diagonal (top-left → bottom-right)</option>
+              <option value="b" data-i18n-opt="grad_b">Vertical (top → bottom)</option>
+              <option value="r" data-i18n-opt="grad_r">Horizontal (left → right)</option>
+              <option value="bl" data-i18n-opt="grad_bl">Diagonal (top-right → bottom-left)</option>
             </select>
           </div>
         </div>
@@ -323,12 +471,12 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     <!-- TYPE PANEL -->
     <div class="panel" id="pan-type">
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Lettertype <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_font">Font</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="f"><label>Font familie</label>
+          <div class="f"><label data-i18n="label_fontfam">Font family</label>
             <select id="selFont" onchange="S.font=this.value;up();gen()">
-              <option value="Georgia-Italic">Georgia Italic (standaard)</option>
-              <option value="Georgia">Georgia Regular</option>
+              <option value="Georgia-Italic" data-i18n-opt="font_default_italic">Georgia Italic (default)</option>
+              <option value="Georgia" data-i18n-opt="font_regular">Georgia Regular</option>
               <option value="TimesNewRomanPS-ItalicMT">Times New Roman Italic</option>
               <option value="TimesNewRomanPSMT">Times New Roman</option>
               <option value="Palatino-Italic">Palatino Italic</option>
@@ -355,27 +503,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Lettergroottes per widget <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_fontsizes">Font sizes per widget</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
           <div class="row3">
-            <div class="sf"><div class="slrow"><label>Klein</label><span class="slval" id="vfsS">13</span></div><input type="range" min="8" max="20" value="13" oninput="S.fs.s=+this.value;document.getElementById('vfsS').textContent=this.value;up();gen()"></div>
-            <div class="sf"><div class="slrow"><label>Medium</label><span class="slval" id="vfsM">16</span></div><input type="range" min="10" max="26" value="16" oninput="S.fs.m=+this.value;document.getElementById('vfsM').textContent=this.value;up();gen()"></div>
-            <div class="sf"><div class="slrow"><label>Groot</label><span class="slval" id="vfsL">19</span></div><input type="range" min="12" max="30" value="19" oninput="S.fs.l=+this.value;document.getElementById('vfsL').textContent=this.value;up();gen()"></div>
+            <div class="sf"><div class="slrow"><label data-i18n="label_small">Small</label><span class="slval" id="vfsS">13</span></div><input type="range" min="8" max="20" value="13" oninput="S.fs.s=+this.value;document.getElementById('vfsS').textContent=this.value;up();gen()"></div>
+            <div class="sf"><div class="slrow"><label data-i18n="label_medium">Medium</label><span class="slval" id="vfsM">16</span></div><input type="range" min="10" max="26" value="16" oninput="S.fs.m=+this.value;document.getElementById('vfsM').textContent=this.value;up();gen()"></div>
+            <div class="sf"><div class="slrow"><label data-i18n="label_large">Large</label><span class="slval" id="vfsL">19</span></div><input type="range" min="12" max="30" value="19" oninput="S.fs.l=+this.value;document.getElementById('vfsL').textContent=this.value;up();gen()"></div>
           </div>
         </div>
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Tekstuitlijning &amp; opties <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_textalign">Text alignment &amp; options</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="sf"><div class="slrow"><label>Min. schaalfactor</label><span class="slval" id="vscale">0.45</span></div><input type="range" min="20" max="95" value="45" oninput="S.scale=+(this.value/100).toFixed(2);document.getElementById('vscale').textContent=S.scale;gen()"></div>
-          <p class="hint">Hoe klein de tekst mag schalen als hij niet past.</p>
-          <div class="f"><label>Regelafstand (preview)</label>
+          <div class="sf"><div class="slrow"><label data-i18n="label_minscale">Min. scale factor</label><span class="slval" id="vscale">0.45</span></div><input type="range" min="20" max="95" value="45" oninput="S.scale=+(this.value/100).toFixed(2);document.getElementById('vscale').textContent=S.scale;gen()"></div>
+          <p class="hint" data-i18n="hint_scale">How small the text may scale if it does not fit.</p>
+          <div class="f"><label data-i18n="label_lineh">Line height (preview)</label>
             <select id="selLH" onchange="S.lh=this.value;up()">
-              <option value="1.35">Compact (1.35)</option>
-              <option value="1.45" selected>Normaal (1.45)</option>
-              <option value="1.6">Ruim (1.6)</option>
-              <option value="1.75">Luchtig (1.75)</option>
+              <option value="1.35" data-i18n-opt="lh_compact">Compact (1.35)</option>
+              <option value="1.45" selected data-i18n-opt="lh_normal">Normal (1.45)</option>
+              <option value="1.6" data-i18n-opt="lh_wide">Wide (1.6)</option>
+              <option value="1.75" data-i18n-opt="lh_airy">Airy (1.75)</option>
             </select>
           </div>
         </div>
@@ -385,28 +533,28 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     <!-- ORNAMENT PANEL -->
     <div class="panel" id="pan-orn">
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Ornament karakter <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_ornchar">Ornament character</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
           <div class="og" id="ornGrid"></div>
           <div class="div"></div>
-          <div class="f"><label>Eigen karakter</label><input type="text" id="custOrn" maxlength="2" placeholder="Typ hier..." style="font-size:18px;text-align:center;font-family:Georgia,serif" oninput="if(this.value){S.orn=this.value[0];document.querySelectorAll('.ob').forEach(b=>b.classList.remove('on'));up();gen()}"></div>
+          <div class="f"><label data-i18n="label_customchar">Custom character</label><input type="text" id="custOrn" maxlength="2" placeholder="Type here..." data-i18n-placeholder="placeholder_type" style="font-size:18px;text-align:center;font-family:Georgia,serif" oninput="if(this.value){S.orn=this.value[0];document.querySelectorAll('.ob').forEach(b=>b.classList.remove('on'));up();gen()}"></div>
         </div>
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Ornament grootte &amp; opaciteit <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_ornsize">Ornament size &amp; opacity</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="sf"><div class="slrow"><label>Grootte</label><span class="slval" id="vos">52</span></div><input type="range" min="18" max="120" value="52" oninput="S.ornSize=+this.value;document.getElementById('vos').textContent=this.value;up();gen()"></div>
-          <div class="sf"><div class="slrow"><label>Opaciteit</label><span class="slval" id="voo">35%</span></div><input type="range" min="5" max="100" value="35" oninput="S.ornOp=+(this.value/100).toFixed(2);document.getElementById('voo').textContent=this.value+'%';up();gen()"></div>
+          <div class="sf"><div class="slrow"><label data-i18n="label_size">Size</label><span class="slval" id="vos">52</span></div><input type="range" min="18" max="120" value="52" oninput="S.ornSize=+this.value;document.getElementById('vos').textContent=this.value;up();gen()"></div>
+          <div class="sf"><div class="slrow"><label data-i18n="label_opacity">Opacity</label><span class="slval" id="voo">35%</span></div><input type="range" min="5" max="100" value="35" oninput="S.ornOp=+(this.value/100).toFixed(2);document.getElementById('voo').textContent=this.value+'%';up();gen()"></div>
         </div>
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Datum ornament <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_dateorn">Date ornament</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="f"><label>Prefix karakter</label><input type="text" id="dateOrn" value="✿" maxlength="2" style="font-size:18px;text-align:center;font-family:Georgia,serif" oninput="S.dateOrn=this.value||'✿';up();gen()"></div>
-          <div class="sf"><div class="slrow"><label>Datum opaciteit</label><span class="slval" id="vdo">55%</span></div><input type="range" min="10" max="100" value="55" oninput="S.dateOp=+(this.value/100).toFixed(2);document.getElementById('vdo').textContent=this.value+'%';up();gen()"></div>
-          <div class="sf"><div class="slrow"><label>Datum lettergrootte</label><span class="slval" id="vdfs">9</span></div><input type="range" min="7" max="14" value="9" oninput="S.dateFs=+this.value;document.getElementById('vdfs').textContent=this.value;up();gen()"></div>
+          <div class="f"><label data-i18n="label_prefix">Prefix character</label><input type="text" id="dateOrn" value="✿" maxlength="2" style="font-size:18px;text-align:center;font-family:Georgia,serif" oninput="S.dateOrn=this.value||'✿';up();gen()"></div>
+          <div class="sf"><div class="slrow"><label data-i18n="label_dateopacity">Date opacity</label><span class="slval" id="vdo">55%</span></div><input type="range" min="10" max="100" value="55" oninput="S.dateOp=+(this.value/100).toFixed(2);document.getElementById('vdo').textContent=this.value+'%';up();gen()"></div>
+          <div class="sf"><div class="slrow"><label data-i18n="label_datefontsize">Date font size</label><span class="slval" id="vdfs">9</span></div><input type="range" min="7" max="14" value="9" oninput="S.dateFs=+this.value;document.getElementById('vdfs').textContent=this.value;up();gen()"></div>
         </div>
       </div>
     </div>
@@ -414,10 +562,10 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     <!-- MISC PANEL -->
     <div class="panel" id="pan-misc">
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">JW.org instellingen <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_jw">JW.org settings</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
           <div class="row2">
-            <div class="f"><label>Taal (wtLocale)</label>
+            <div class="f"><label data-i18n="label_lang">Language (wtLocale)</label>
               <select id="selLocale" onchange="S.locale=this.value;gen()">
                 <option value="o">Nederlands (o)</option>
                 <option value="e">Engels (e)</option>
@@ -440,26 +588,26 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Widget padding &amp; stijl <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_padding">Widget padding &amp; style</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="sf"><div class="slrow"><label>Padding (rondom)</label><span class="slval" id="vpad">14</span></div><input type="range" min="6" max="26" value="14" oninput="S.pad=+this.value;document.getElementById('vpad').textContent=this.value;up();gen()"></div>
-          <div class="sf"><div class="slrow"><label>Ruimte boven tekst</label><span class="slval" id="vtsp">2</span></div><input type="range" min="0" max="14" value="2" oninput="S.tsp=+this.value;document.getElementById('vtsp').textContent=this.value;up();gen()"></div>
+          <div class="sf"><div class="slrow"><label data-i18n="label_padding">Padding (all sides)</label><span class="slval" id="vpad">14</span></div><input type="range" min="6" max="26" value="14" oninput="S.pad=+this.value;document.getElementById('vpad').textContent=this.value;up();gen()"></div>
+          <div class="sf"><div class="slrow"><label data-i18n="label_textspace">Space above text</label><span class="slval" id="vtsp">2</span></div><input type="range" min="0" max="14" value="2" oninput="S.tsp=+this.value;document.getElementById('vtsp').textContent=this.value;up();gen()"></div>
         </div>
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Voorbeeld tekst <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_previewtxt">Preview text</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
-          <div class="f"><label>Tekst voor preview</label><input type="text" id="prvTxt" value="Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4" oninput="up()"></div>
-          <p class="hint">Alleen voor de live preview. Het echte script haalt tekst op van JW.org.</p>
+          <div class="f"><label data-i18n="label_previewtxt">Text for preview</label><input type="text" id="prvTxt" value="Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4" oninput="up()"></div>
+          <p class="hint" data-i18n="hint_previewtxt">For the live preview only. The actual script fetches text from JW.org.</p>
         </div>
       </div>
 
       <div class="sec on">
-        <div class="sec-h" onclick="tgl(this)">Scriptable icon <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_icon">Scriptable icon</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div class="sec-b">
           <div class="row2">
-            <div class="f"><label>Icon kleur</label>
+            <div class="f"><label data-i18n="label_iconcolor">Icon color</label>
               <select id="selIconClr">
                 <option value="brown" selected>Brown</option>
                 <option value="blue">Blue</option>
@@ -473,7 +621,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
                 <option value="white">White</option>
               </select>
             </div>
-            <div class="f"><label>Icon glyph</label>
+            <div class="f"><label data-i18n="label_iconglyph">Icon glyph</label>
               <select id="selIconGl">
                 <option value="book-open" selected>book-open</option>
                 <option value="bible">bible</option>
@@ -501,23 +649,24 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <div class="right">
   <div class="pctrl">
     <div class="cg" id="cgSize">
-      <button class="cb on" onclick="sz('sm',this)">Klein</button>
-      <button class="cb" onclick="sz('md',this)">Medium</button>
-      <button class="cb" onclick="sz('lg',this)">Groot</button>
+      <button class="cb on" onclick="sz('sm',this)" data-i18n="btn_small">Small</button>
+      <button class="cb" onclick="sz('md',this)" data-i18n="btn_medium">Medium</button>
+      <button class="cb" onclick="sz('lg',this)" data-i18n="btn_large">Large</button>
     </div>
     <div class="cg" id="cgMode">
       <button class="cb on" onclick="md('light',this)">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        Licht
+        <span data-i18n="btn_light">Light</span>
       </button>
       <button class="cb" onclick="md('dark',this)">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        Donker
+        <span data-i18n="btn_dark">Dark</span>
       </button>
     </div>
   </div>
 
-  <div class="ws">
+  <!-- Bare widget view -->
+  <div class="ws" id="viewWidget">
     <div class="wp sm" id="wPreview" style="padding:14px 16px">
       <div style="display:flex;justify-content:center;flex-shrink:0">
         <div class="wo" id="pOrn" style="font-size:52px;opacity:.35">&ldquo;</div>
@@ -530,12 +679,13 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
   </div>
 
+
   <div class="co">
     <div class="co-hdr">
-      <span class="co-title">Gegenereerde script</span>
+      <span class="co-title" data-i18n="code_title">Generated script</span>
       <button class="btn-copy" id="btnCopy" onclick="copyCode()">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Kopieer
+        <span data-i18n="btn_copy">Copy</span>
       </button>
     </div>
     <textarea class="code-ta" id="codeOut" readonly></textarea>
@@ -547,15 +697,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <nav class="mob-nav" id="mobNav">
   <button class="mob-nav-btn on" id="mn-settings" onclick="mobTab('settings')">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Instellingen
+    <span data-i18n="mob_settings">Settings</span>
   </button>
   <button class="mob-nav-btn" id="mn-preview" onclick="mobTab('preview')">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-    Preview
+    <span data-i18n="mob_preview">Preview</span>
   </button>
   <button class="mob-nav-btn" id="mn-code" onclick="mobTab('code')">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    Script
+    <span data-i18n="mob_script">Script</span>
   </button>
 </nav>
 
@@ -742,11 +892,11 @@ function up(){
   ti.style.fontFamily=ff[0];
   ti.style.fontStyle=ff[1]?'italic':'normal';
 
-  const txt=document.getElementById('prvTxt').value||'Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4';
+  const txt=document.getElementById('prvTxt').value||((LANGS[curLang]||LANGS.en).default_preview);
   ti.textContent=txt;
 
   const today=new Date();
-  const mn=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const mn=(LANGS[curLang]||LANGS.en).months;
   const dt=document.getElementById('pDate');
   dt.textContent=`${S.dateOrn}  ${today.getDate()} ${mn[today.getMonth()]} ${today.getFullYear()}`;
   dt.style.color=m.ornament;
@@ -959,7 +1109,7 @@ function copyCode(){
     btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Gekopieerd!';
     setTimeout(()=>{
       btn.classList.remove('done');
-      btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Kopieer';
+      btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> '+((LANGS[curLang]||LANGS.en).btn_copy);
     },2500);
   });
 }
@@ -974,10 +1124,230 @@ function doExport(){
   a.click();
   URL.revokeObjectURL(a.href);
   const btn=document.getElementById('btnExport');
-  btn.textContent='Gedownload!';
-  setTimeout(()=>btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exporteer Script',2500);
+  btn.textContent=((LANGS[curLang]||LANGS.en).btn_downloaded);
+  setTimeout(()=>{const t2=(LANGS[curLang]||LANGS.en);btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span data-i18n="btn_export">'+t2.btn_export+'</span>'},2500);
 }
 
+
+// ── TRANSLATIONS ───────────────────────────────────────────────────────────
+const LANGS = {
+  nl: {
+    tab_themes:'Thema\'s', tab_colors:'Kleuren', tab_type:'Tekst', tab_orn:'Ornament', tab_misc:'Overig',
+    onb_title:'Hoe werkt dit?',
+    step1_title:'Download Scriptable', step1_desc:'Installeer de gratis Scriptable-app op je iPhone of iPad via de App Store.',
+    step2_title:'Pas het thema aan', step2_desc:'Kies een thema of stel kleuren, lettertype en ornament zelf in via de tabbladen links.',
+    step3_title:'Exporteer het script', step3_desc:'Klik op <strong style="color:var(--acc)">Exporteer Script</strong> bovenaan om het .js-bestand te downloaden, of kopieer de code via het Script-tabblad.',
+    step4_title:'Plak in Scriptable', step4_desc:'Open Scriptable op je iPhone → tik op <strong style="color:var(--tx)">+</strong> → plak de gekopieerde code → sla op. Voeg vervolgens een Scriptable-widget toe aan je beginscherm en kies dit script.',
+    sec_themes:'Preset thema\'s', sec_grad:'Verloop richting', label_dir:'Richting',
+    grad_tr:'Diagonaal (links-boven → rechts-onder)', grad_b:'Verticaal (boven → onder)',
+    grad_r:'Horizontaal (links → rechts)', grad_bl:'Diagonaal (rechts-boven → links-onder)',
+    sec_font:'Lettertype', label_fontfam:'Font familie',
+    font_default_italic:'Georgia Italic (standaard)', font_regular:'Georgia Regular',
+    sec_fontsizes:'Lettergroottes per widget', label_small:'Klein', label_medium:'Medium', label_large:'Groot',
+    sec_textalign:'Tekstuitlijning & opties', label_minscale:'Min. schaalfactor',
+    hint_scale:'Hoe klein de tekst mag schalen als hij niet past.',
+    label_lineh:'Regelafstand (preview)', lh_compact:'Compact (1.35)', lh_normal:'Normaal (1.45)', lh_wide:'Ruim (1.6)', lh_airy:'Luchtig (1.75)',
+    sec_ornchar:'Ornament karakter', label_customchar:'Eigen karakter', placeholder_type:'Typ hier...',
+    sec_ornsize:'Ornament grootte & opaciteit', label_size:'Grootte', label_opacity:'Opaciteit',
+    sec_dateorn:'Datum ornament', label_prefix:'Prefix karakter', label_dateopacity:'Datum opaciteit', label_datefontsize:'Datum lettergrootte',
+    sec_jw:'JW.org instellingen', label_lang:'Taal (wtLocale)',
+    sec_padding:'Widget padding & stijl', label_padding:'Padding (rondom)', label_textspace:'Ruimte boven tekst',
+    sec_previewtxt:'Voorbeeld tekst', label_previewtxt:'Tekst voor preview',
+    hint_previewtxt:'Alleen voor de live preview. Het echte script haalt tekst op van JW.org.',
+    sec_icon:'Scriptable icon', label_iconcolor:'Icon kleur', label_iconglyph:'Icon glyph',
+    sec_light_bg:'Licht — achtergrond', sec_dark_bg:'Donker — achtergrond',
+    label_top:'Boven (bg1)', label_bottom:'Onder (bg2)', label_text:'Tekst', label_ornament:'Ornament',
+    btn_lightmode:'Licht modus', btn_darkmode:'Donker modus',
+    btn_small:'Klein', btn_medium:'Medium', btn_large:'Groot', btn_light:'Licht', btn_dark:'Donker',
+    code_title:'Gegenereerde script', btn_copy:'Kopieer', btn_copied:'Gekopieerd!',
+    btn_export:'Exporteer Script', btn_downloaded:'Gedownload!',
+    btn_preview:'Preview', btn_edit:'Bewerk', mob_settings:'Instellingen', mob_preview:'Preview', mob_script:'Script',
+    months:['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'],
+    default_preview:'Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4',
+    preset_names:['Origineel','Middernacht','Zonsondergang','Woud','Poolijs','Sakura','Perkament','Amethist','Roségoud','Theegroen'],
+  },
+  en: {
+    tab_themes:'Themes', tab_colors:'Colors', tab_type:'Text', tab_orn:'Ornament', tab_misc:'Other',
+    onb_title:'How does this work?',
+    step1_title:'Download Scriptable', step1_desc:'Install the free Scriptable app on your iPhone or iPad via the App Store.',
+    step2_title:'Customize the theme', step2_desc:'Choose a theme or set colors, font and ornament via the tabs on the left.',
+    step3_title:'Export the script', step3_desc:'Click <strong style="color:var(--acc)">Export Script</strong> above to download the .js file, or copy the code via the Script tab.',
+    step4_title:'Paste in Scriptable', step4_desc:'Open Scriptable on your iPhone → tap <strong style="color:var(--tx)">+</strong> → paste the copied code → save. Then add a Scriptable widget to your home screen and choose this script.',
+    sec_themes:'Preset themes', sec_grad:'Gradient direction', label_dir:'Direction',
+    grad_tr:'Diagonal (top-left → bottom-right)', grad_b:'Vertical (top → bottom)',
+    grad_r:'Horizontal (left → right)', grad_bl:'Diagonal (top-right → bottom-left)',
+    sec_font:'Font', label_fontfam:'Font family',
+    font_default_italic:'Georgia Italic (default)', font_regular:'Georgia Regular',
+    sec_fontsizes:'Font sizes per widget', label_small:'Small', label_medium:'Medium', label_large:'Large',
+    sec_textalign:'Text alignment & options', label_minscale:'Min. scale factor',
+    hint_scale:'How small the text may scale if it does not fit.',
+    label_lineh:'Line height (preview)', lh_compact:'Compact (1.35)', lh_normal:'Normal (1.45)', lh_wide:'Wide (1.6)', lh_airy:'Airy (1.75)',
+    sec_ornchar:'Ornament character', label_customchar:'Custom character', placeholder_type:'Type here...',
+    sec_ornsize:'Ornament size & opacity', label_size:'Size', label_opacity:'Opacity',
+    sec_dateorn:'Date ornament', label_prefix:'Prefix character', label_dateopacity:'Date opacity', label_datefontsize:'Date font size',
+    sec_jw:'JW.org settings', label_lang:'Language (wtLocale)',
+    sec_padding:'Widget padding & style', label_padding:'Padding (all sides)', label_textspace:'Space above text',
+    sec_previewtxt:'Preview text', label_previewtxt:'Text for preview',
+    hint_previewtxt:'For the live preview only. The actual script fetches text from JW.org.',
+    sec_icon:'Scriptable icon', label_iconcolor:'Icon color', label_iconglyph:'Icon glyph',
+    sec_light_bg:'Light — background', sec_dark_bg:'Dark — background',
+    label_top:'Top (bg1)', label_bottom:'Bottom (bg2)', label_text:'Text', label_ornament:'Ornament',
+    btn_lightmode:'Light mode', btn_darkmode:'Dark mode',
+    btn_small:'Small', btn_medium:'Medium', btn_large:'Large', btn_light:'Light', btn_dark:'Dark',
+    code_title:'Generated script', btn_copy:'Copy', btn_copied:'Copied!',
+    btn_export:'Export Script', btn_downloaded:'Downloaded!',
+    btn_preview:'Preview', btn_edit:'Edit', mob_settings:'Settings', mob_preview:'Preview', mob_script:'Script',
+    months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    default_preview:'Make your ways known to me, Jehovah, teach me your paths — Psalm 25:4',
+    preset_names:['Original','Midnight','Sunset','Forest','Arctic','Sakura','Parchment','Amethyst','Rose Gold','Tea Green'],
+  },
+  es: {
+    tab_themes:'Temas', tab_colors:'Colores', tab_type:'Texto', tab_orn:'Ornamento', tab_misc:'Otros',
+    onb_title:'¿Cómo funciona?',
+    step1_title:'Descargar Scriptable', step1_desc:'Instala la app gratuita Scriptable en tu iPhone o iPad desde la App Store.',
+    step2_title:'Personalizar el tema', step2_desc:'Elige un tema o configura colores, fuente y ornamento desde las pestañas de la izquierda.',
+    step3_title:'Exportar el script', step3_desc:'Haz clic en <strong style="color:var(--acc)">Exportar Script</strong> para descargar el archivo .js, o copia el código desde la pestaña Script.',
+    step4_title:'Pegar en Scriptable', step4_desc:'Abre Scriptable en tu iPhone → toca <strong style="color:var(--tx)">+</strong> → pega el código copiado → guarda. Luego añade un widget de Scriptable a tu pantalla de inicio y elige este script.',
+    sec_themes:'Temas predefinidos', sec_grad:'Dirección del degradado', label_dir:'Dirección',
+    grad_tr:'Diagonal (arriba-izq → abajo-der)', grad_b:'Vertical (arriba → abajo)',
+    grad_r:'Horizontal (izquierda → derecha)', grad_bl:'Diagonal (arriba-der → abajo-izq)',
+    sec_font:'Fuente', label_fontfam:'Familia de fuente',
+    font_default_italic:'Georgia Italic (predeterminado)', font_regular:'Georgia Regular',
+    sec_fontsizes:'Tamaños de fuente por widget', label_small:'Pequeño', label_medium:'Mediano', label_large:'Grande',
+    sec_textalign:'Alineación de texto y opciones', label_minscale:'Factor de escala mín.',
+    hint_scale:'Qué tan pequeño puede escalar el texto si no cabe.',
+    label_lineh:'Interlineado (vista previa)', lh_compact:'Compacto (1.35)', lh_normal:'Normal (1.45)', lh_wide:'Amplio (1.6)', lh_airy:'Aireado (1.75)',
+    sec_ornchar:'Carácter de ornamento', label_customchar:'Carácter personalizado', placeholder_type:'Escribe aquí...',
+    sec_ornsize:'Tamaño y opacidad del ornamento', label_size:'Tamaño', label_opacity:'Opacidad',
+    sec_dateorn:'Ornamento de fecha', label_prefix:'Carácter de prefijo', label_dateopacity:'Opacidad de fecha', label_datefontsize:'Tamaño de fuente de fecha',
+    sec_jw:'Configuración de JW.org', label_lang:'Idioma (wtLocale)',
+    sec_padding:'Relleno y estilo del widget', label_padding:'Relleno (todos los lados)', label_textspace:'Espacio encima del texto',
+    sec_previewtxt:'Texto de vista previa', label_previewtxt:'Texto para vista previa',
+    hint_previewtxt:'Solo para la vista previa en vivo. El script real obtiene el texto de JW.org.',
+    sec_icon:'Ícono de Scriptable', label_iconcolor:'Color del ícono', label_iconglyph:'Glifo del ícono',
+    sec_light_bg:'Claro — fondo', sec_dark_bg:'Oscuro — fondo',
+    label_top:'Arriba (bg1)', label_bottom:'Abajo (bg2)', label_text:'Texto', label_ornament:'Ornamento',
+    btn_lightmode:'Modo claro', btn_darkmode:'Modo oscuro',
+    btn_small:'Pequeño', btn_medium:'Mediano', btn_large:'Grande', btn_light:'Claro', btn_dark:'Oscuro',
+    code_title:'Script generado', btn_copy:'Copiar', btn_copied:'¡Copiado!',
+    btn_export:'Exportar Script', btn_downloaded:'¡Descargado!',
+    btn_preview:'Vista previa', btn_edit:'Editar', mob_settings:'Ajustes', mob_preview:'Vista previa', mob_script:'Script',
+    months:['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+    default_preview:'Hazme conocer tus caminos, Jehová, enséñame tus sendas — Salmo 25:4',
+    preset_names:['Original','Medianoche','Atardecer','Bosque','Ártico','Sakura','Pergamino','Amatista','Oro Rosa','Verde Té'],
+  },
+  de: {
+    tab_themes:'Themen', tab_colors:'Farben', tab_type:'Text', tab_orn:'Ornament', tab_misc:'Sonstige',
+    onb_title:'Wie funktioniert das?',
+    step1_title:'Scriptable herunterladen', step1_desc:'Installiere die kostenlose Scriptable-App auf deinem iPhone oder iPad über den App Store.',
+    step2_title:'Thema anpassen', step2_desc:'Wähle ein Thema oder stelle Farben, Schrift und Ornament selbst über die Tabs links ein.',
+    step3_title:'Skript exportieren', step3_desc:'Klicke oben auf <strong style="color:var(--acc)">Skript exportieren</strong>, um die .js-Datei herunterzuladen, oder kopiere den Code über den Script-Tab.',
+    step4_title:'In Scriptable einfügen', step4_desc:'Öffne Scriptable auf deinem iPhone → tippe auf <strong style="color:var(--tx)">+</strong> → füge den kopierten Code ein → speichern. Füge dann ein Scriptable-Widget zu deinem Startbildschirm hinzu und wähle dieses Skript.',
+    sec_themes:'Voreingestellte Themen', sec_grad:'Verlaufsrichtung', label_dir:'Richtung',
+    grad_tr:'Diagonal (links-oben → rechts-unten)', grad_b:'Vertikal (oben → unten)',
+    grad_r:'Horizontal (links → rechts)', grad_bl:'Diagonal (rechts-oben → links-unten)',
+    sec_font:'Schriftart', label_fontfam:'Schriftfamilie',
+    font_default_italic:'Georgia Kursiv (Standard)', font_regular:'Georgia Regular',
+    sec_fontsizes:'Schriftgrößen pro Widget', label_small:'Klein', label_medium:'Mittel', label_large:'Groß',
+    sec_textalign:'Textausrichtung & Optionen', label_minscale:'Min. Skalierungsfaktor',
+    hint_scale:'Wie klein der Text skaliert werden darf, wenn er nicht passt.',
+    label_lineh:'Zeilenabstand (Vorschau)', lh_compact:'Kompakt (1.35)', lh_normal:'Normal (1.45)', lh_wide:'Weit (1.6)', lh_airy:'Luftig (1.75)',
+    sec_ornchar:'Ornamentzeichen', label_customchar:'Eigenes Zeichen', placeholder_type:'Hier eingeben...',
+    sec_ornsize:'Ornamentgröße & Deckkraft', label_size:'Größe', label_opacity:'Deckkraft',
+    sec_dateorn:'Datumsornament', label_prefix:'Präfixzeichen', label_dateopacity:'Datums-Deckkraft', label_datefontsize:'Datums-Schriftgröße',
+    sec_jw:'JW.org-Einstellungen', label_lang:'Sprache (wtLocale)',
+    sec_padding:'Widget-Abstand & Stil', label_padding:'Abstand (ringsum)', label_textspace:'Abstand über Text',
+    sec_previewtxt:'Vorschautext', label_previewtxt:'Text für Vorschau',
+    hint_previewtxt:'Nur für die Live-Vorschau. Das eigentliche Skript ruft den Text von JW.org ab.',
+    sec_icon:'Scriptable-Symbol', label_iconcolor:'Symbolfarbe', label_iconglyph:'Symbol-Glyph',
+    sec_light_bg:'Hell — Hintergrund', sec_dark_bg:'Dunkel — Hintergrund',
+    label_top:'Oben (bg1)', label_bottom:'Unten (bg2)', label_text:'Text', label_ornament:'Ornament',
+    btn_lightmode:'Hellmodus', btn_darkmode:'Dunkelmodus',
+    btn_small:'Klein', btn_medium:'Mittel', btn_large:'Groß', btn_light:'Hell', btn_dark:'Dunkel',
+    code_title:'Generiertes Skript', btn_copy:'Kopieren', btn_copied:'Kopiert!',
+    btn_export:'Skript exportieren', btn_downloaded:'Heruntergeladen!',
+    btn_preview:'Vorschau', btn_edit:'Bearbeiten', mob_settings:'Einstellungen', mob_preview:'Vorschau', mob_script:'Skript',
+    months:['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+    default_preview:'Lass mich deine Wege kennen, Jehova, lehre mich deine Pfade — Psalm 25:4',
+    preset_names:['Original','Mitternacht','Sonnenuntergang','Wald','Polareis','Sakura','Pergament','Amethyst','Roségold','Teegreen'],
+  },
+};
+
+let curLang = 'en';
+
+function setLang(code) {
+  curLang = code;
+  // Update lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('on'));
+  const lb = document.getElementById('lb-' + code);
+  if (lb) lb.classList.add('on');
+  // Update html lang attribute
+  document.documentElement.lang = code;
+
+  const t = LANGS[code];
+  if (!t) return;
+
+  // Apply text to data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) {
+      // Use innerHTML for elements that might contain HTML (step descs)
+      if (key.startsWith('step') && key.endsWith('_desc')) {
+        el.innerHTML = t[key];
+      } else {
+        el.textContent = t[key];
+      }
+    }
+  });
+
+  // Apply placeholder translations
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key] !== undefined) el.placeholder = t[key];
+  });
+
+  // Apply select option translations
+  document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+    const key = el.getAttribute('data-i18n-opt');
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+
+  // Update default preview text placeholder
+  const prvTxt = document.getElementById('prvTxt');
+  if (prvTxt && prvTxt.value === '') {
+    prvTxt.placeholder = t.default_preview;
+  }
+  // If preview text is still a Dutch/default text, swap it
+  const defTexts = Object.values(LANGS).map(l => l.default_preview);
+  if (prvTxt && defTexts.includes(prvTxt.value)) {
+    prvTxt.value = t.default_preview;
+    up();
+  }
+
+  // Rebuild themes grid with translated names
+  rebuildThemesWithLang(t);
+
+  // Refresh preview date with new months
+  up();
+}
+
+function rebuildThemesWithLang(t) {
+  const g = document.getElementById('themeGrid');
+  if (!g) return;
+  const names = t.preset_names || PRESETS.map(p => p.name);
+  g.querySelectorAll('.tc').forEach((card, i) => {
+    const p = PRESETS[i];
+    if (!p) return;
+    const name = names[i] || p.name;
+    const tp = card.querySelector('.tp-txt');
+    if (tp) tp.textContent = name;
+    const tn = card.querySelector('.tn');
+    if (tn) tn.textContent = name;
+  });
+}
+
+
+setLang('en');
 init();
 
 // ── MOBILE NAV ─────────────────────────────
@@ -990,8 +1360,15 @@ init();
   const coEl    = document.querySelector('.co');
   const wsEl    = document.querySelector('.ws');
   const pctrlEl = document.querySelector('.pctrl');
+  const mobilePreviewBtn = document.getElementById('btnMobilePreview');
+  const mobilePreviewLabel = document.getElementById('btnMobilePreviewLabel');
 
   let current = 'settings';
+
+  function updateMobilePreviewButton(){
+    if (!mobilePreviewLabel) return;
+    const _t=(LANGS[curLang]||LANGS.en); mobilePreviewLabel.textContent = current === 'preview' ? _t.btn_edit : _t.btn_preview;
+  }
 
   function applyView(tab){
     current = tab;
@@ -1002,6 +1379,7 @@ init();
       coEl.style.display = '';
       wsEl.style.display = '';
       pctrlEl.style.display = '';
+      updateMobilePreviewButton();
       return;
     }
 
@@ -1020,24 +1398,40 @@ init();
       leftEl.classList.remove('mob-visible');
       rightEl.classList.add('mob-visible');
       rightEl.classList.remove('mob-hidden');
-      // Show/hide sub-sections within right panel
-      wsEl.style.display    = (tab === 'preview') ? 'flex' : 'none';
-      pctrlEl.style.display = (tab === 'preview') ? 'flex' : 'none';
-      coEl.style.display    = (tab === 'code')    ? 'block': 'none';
+      const vw = document.getElementById('viewWidget');
+      const isPreview = tab === 'preview';
+      const isCode    = tab === 'code';
+      if (vw) vw.style.display = isPreview ? 'flex' : 'none';
+      pctrlEl.style.display = isPreview ? 'flex' : 'none';
+      coEl.style.display    = isCode    ? 'block' : 'none';
     }
+
+    updateMobilePreviewButton();
   }
 
   window.mobTab = function(tab){ applyView(tab); };
 
+  window.toggleMobilePreview = function(){
+    if (current === 'preview') {
+      applyView('settings');
+    } else {
+      applyView('preview');
+    }
+  };
+
   // On resize switch back to desktop layout if needed
   window.addEventListener('resize', () => {
-    if (!isMobile()) applyView(current);
-    else applyView(current);
+    applyView(current);
   });
 
   // Init on load
   if (isMobile()) applyView('settings');
 })();
+
+const _origUp = window.up;
+window.up = function() {
+  _origUp && _origUp();
+};
 </script>
 </body>
 </html>
