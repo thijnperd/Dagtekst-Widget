@@ -129,12 +129,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     grid-template-rows:48px 1fr 56px;
   }
   header{
-    padding:0 14px;
+    padding:0 12px;
+    gap:8px;
   }
   .logo-sub{ display:none; }
+  .logo{ font-size:13px; }
   .btn-primary{
     font-size:11px;
-    padding:6px 12px;
+    padding:6px 10px;
+    flex-shrink:0;
   }
   /* Main becomes single full-height column */
   .main{
@@ -149,13 +152,18 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     width:100%;
     height:100%;
     transition:opacity .2s ease, transform .2s ease;
-    overflow-y:auto;
     overflow-x:hidden;
     border:none;
   }
-  /* Active mobile view */
-  .left{  display:flex; z-index:1; }
-  .right{ display:flex; flex-direction:column; align-items:center; z-index:0; padding:18px 16px; gap:18px; }
+  /* Left panel: let it scroll itself */
+  .left{
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    z-index:1;
+  }
+  .right{ display:flex; flex-direction:column; align-items:center; z-index:0; padding:16px 14px; gap:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 
   /* Hidden state */
   .mob-hidden{
@@ -179,9 +187,23 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
   /* Widget stage doesn't need to center in a giant space */
   .ws{ width:100%; justify-content:center; }
 
-  /* Tabs in left panel: make touch-friendly */
-  .tabs{ padding:8px 10px; gap:3px; }
-  .tab{ padding:7px 2px; font-size:10.5px; }
+  /* ── ON MOBILE: hide tabs, show all panels as one scrollable list ── */
+  .tabs{ display:none; }
+
+  /* .scroll: no longer needs to handle its own scroll — left does it */
+  .scroll{
+    flex:none;
+    overflow-y:visible;
+    padding:10px 10px 16px;
+    gap:8px;
+  }
+
+  /* All panels visible at once (not tab-switched) */
+  .panel{ display:contents !important; }
+
+  /* Section body: slightly tighter padding on mobile */
+  .sec-b{ padding:11px; gap:9px; }
+  .sec-h{ padding:10px 12px; font-size:10.5px; }
 
   /* Bottom navigation bar */
   .mob-nav{
@@ -217,15 +239,18 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
   input[type=range]{ height:6px; }
   input[type=range]::-webkit-slider-thumb{ width:18px; height:18px; }
 
-  /* Row grids: keep 2-col but allow wrap on very small screens */
+  /* Row grids: keep 2-col */
   .row2{ grid-template-columns:1fr 1fr; }
   .row3{ grid-template-columns:1fr 1fr 1fr; }
 
   /* Preview controls wrap nicely */
   .pctrl{ gap:6px; }
 
-  /* Ornament grid: 8 per row on mobile for more items */
-  .og{ grid-template-columns:repeat(8,1fr); }
+  /* Ornament grid: 7 per row on mobile */
+  .og{ grid-template-columns:repeat(7,1fr); }
+
+  /* Mode toggle (light/dark) fits comfortably */
+  .mt{ margin-bottom:0; }
 }
 
 
@@ -237,6 +262,68 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 
 /* Hide mob-nav on desktop */
 .mob-nav{ display:none; }
+
+/* ── MOBILE SECTION NAV ─────────────────────── */
+.mob-sec-nav{ display:none; }
+@media(max-width:700px){
+  .mob-sec-nav{
+    display:flex;
+    gap:6px;
+    padding:8px 10px;
+    overflow-x:auto;
+    flex-shrink:0;
+    background:var(--s1);
+    border-bottom:1px solid var(--bd);
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  .mob-sec-nav::-webkit-scrollbar{ display:none; }
+  .mob-sec-pill{
+    white-space:nowrap;
+    background:var(--s2);
+    border:1px solid var(--bd2);
+    border-radius:20px;
+    color:var(--txm);
+    font-family:inherit;
+    font-size:11px;
+    font-weight:500;
+    padding:5px 13px;
+    cursor:pointer;
+    transition:all .15s;
+    flex-shrink:0;
+  }
+  .mob-sec-pill.act{
+    background:var(--acc2);
+    border-color:var(--acc3);
+    color:var(--acc);
+  }
+  /* Anchor targets (zero-height) */
+  .mob-anchor{ height:0; overflow:hidden; pointer-events:none; }
+  /* Logo → return-to-top */
+  .logo{ cursor:pointer; user-select:none; }
+  .logo-top-arrow{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:15px;height:15px;
+    border-radius:50%;
+    background:var(--acc);
+    margin-left:6px;
+    opacity:0;
+    transform:translateY(3px) scale(.8);
+    transition:opacity .25s, transform .25s;
+    flex-shrink:0;
+    vertical-align:middle;
+  }
+  .logo-top-arrow svg{ display:block; }
+  .can-top .logo-top-arrow{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
 
 
 /* ── ONBOARDING CARD ─────────────────────── */
@@ -323,7 +410,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <body>
 
 <header>
-  <div class="logo"><div class="logo-dot"></div>Widget Builder <span class="logo-sub">Dagelijkse Tekst</span></div>
+  <div class="logo" onclick="mobScrollTop()" title="Back to top"><div class="logo-dot"></div>Widget Builder <span class="logo-sub">Dagelijkse Tekst</span><span class="logo-top-arrow"><svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="#0c0e13" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
   <div class="sp"></div>
   <div class="lang-pick">
     <button class="lang-btn" onclick="setLang('nl')" id="lb-nl">NL</button>
@@ -351,6 +438,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     <button class="tab" onclick="sw('orn',this)" data-i18n="tab_orn">Ornament</button>
     <button class="tab" onclick="sw('misc',this)" data-i18n="tab_misc">Other</button>
   </div>
+
+  <!-- MOBILE SECTION NAV -->
+  <nav class="mob-sec-nav" id="mobSecNav">
+    <button class="mob-sec-pill act" onclick="mobScrollTo('anchor-themes')">Themes</button>
+    <button class="mob-sec-pill" onclick="mobScrollTo('anchor-colors')">Colors</button>
+    <button class="mob-sec-pill" onclick="mobScrollTo('anchor-type')">Text</button>
+    <button class="mob-sec-pill" onclick="mobScrollTo('anchor-orn')">Ornament</button>
+    <button class="mob-sec-pill" onclick="mobScrollTo('anchor-misc')">Other</button>
+  </nav>
 
   <div class="scroll">
 
@@ -403,6 +499,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
 
     <!-- THEMES PANEL -->
+    <div class="mob-anchor" id="anchor-themes"></div>
     <div class="panel on" id="pan-themes">
       <div class="sec on">
         <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_themes">Preset themes</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -411,6 +508,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
 
     <!-- COLORS PANEL -->
+    <div class="mob-anchor" id="anchor-colors"></div>
     <div class="panel" id="pan-colors">
       <div class="mt">
         <button class="mb on" id="cml" onclick="setCM('light')">
@@ -469,6 +567,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
 
     <!-- TYPE PANEL -->
+    <div class="mob-anchor" id="anchor-type"></div>
     <div class="panel" id="pan-type">
       <div class="sec on">
         <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_font">Font</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -531,6 +630,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
 
     <!-- ORNAMENT PANEL -->
+    <div class="mob-anchor" id="anchor-orn"></div>
     <div class="panel" id="pan-orn">
       <div class="sec on">
         <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_ornchar">Ornament character</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -560,6 +660,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
 
     <!-- MISC PANEL -->
+    <div class="mob-anchor" id="anchor-misc"></div>
     <div class="panel" id="pan-misc">
       <div class="sec on">
         <div class="sec-h" onclick="tgl(this)"><span data-i18n="sec_jw">JW.org settings</span> <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -1393,6 +1494,7 @@ init();
       leftEl.classList.remove('mob-hidden');
       rightEl.classList.add('mob-hidden');
       rightEl.classList.remove('mob-visible');
+      // On mobile all panels are always visible (no tab switching needed)
     } else {
       leftEl.classList.add('mob-hidden');
       leftEl.classList.remove('mob-visible');
@@ -1432,6 +1534,74 @@ const _origUp = window.up;
 window.up = function() {
   _origUp && _origUp();
 };
+
+// ── MOBILE SECTION NAV ─────────────────────────
+(function(){
+  const leftEl = document.querySelector('.left');
+  const logo   = document.querySelector('.logo');
+  const pills  = document.querySelectorAll('.mob-sec-pill');
+  const anchors = ['anchor-themes','anchor-colors','anchor-type','anchor-orn','anchor-misc'];
+
+  window.mobScrollTo = function(id) {
+    const target = document.getElementById(id);
+    if (!target || !leftEl) return;
+    // Offset for sticky nav bar height (~40px)
+    const navH = document.getElementById('mobSecNav')?.offsetHeight || 40;
+    const targetTop = target.getBoundingClientRect().top
+                    - leftEl.getBoundingClientRect().top
+                    + leftEl.scrollTop - navH - 4;
+    leftEl.scrollTo({ top: targetTop, behavior: 'smooth' });
+  };
+
+  window.mobScrollTop = function() {
+    if (!leftEl) return;
+    leftEl.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  function updateNav() {
+    if (!leftEl) return;
+    const scrollTop = leftEl.scrollTop;
+    const navH = document.getElementById('mobSecNav')?.offsetHeight || 40;
+
+    // Return-to-top arrow visibility
+    if (scrollTop > 60) {
+      logo && logo.classList.add('can-top');
+    } else {
+      logo && logo.classList.remove('can-top');
+    }
+
+    // Active pill: find which anchor is currently in view
+    let activeIdx = 0;
+    const containerTop = leftEl.getBoundingClientRect().top;
+    anchors.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const elTop = el.getBoundingClientRect().top - containerTop;
+      if (elTop <= navH + 20) activeIdx = i;
+    });
+
+    pills.forEach((p, i) => p.classList.toggle('act', i === activeIdx));
+
+    // Auto-scroll the active pill into view inside the nav bar
+    const activePill = pills[activeIdx];
+    const nav = document.getElementById('mobSecNav');
+    if (activePill && nav) {
+      const pillLeft = activePill.offsetLeft;
+      const pillW    = activePill.offsetWidth;
+      const navW     = nav.offsetWidth;
+      const navScroll = nav.scrollLeft;
+      if (pillLeft < navScroll + 10) {
+        nav.scrollTo({ left: pillLeft - 10, behavior: 'smooth' });
+      } else if (pillLeft + pillW > navScroll + navW - 10) {
+        nav.scrollTo({ left: pillLeft + pillW - navW + 10, behavior: 'smooth' });
+      }
+    }
+  }
+
+  if (leftEl) {
+    leftEl.addEventListener('scroll', updateNav, { passive: true });
+  }
+})();
 </script>
 </body>
 </html>
