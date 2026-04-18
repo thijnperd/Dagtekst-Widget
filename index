@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dagelijkse Tekst — Widget Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0e13;--s1:#141720;--s2:#1c2030;--s3:#242840;--bd:#ffffff0d;--bd2:#ffffff18;--bd3:#ffffff28;--acc:#c8a255;--acc2:#c8a25520;--acc3:#c8a25538;--tx:#ede9e0;--txm:#9a96a8;--txf:#4a4860;--r4:4px;--r8:8px;--r12:12px;--r20:20px;font-family:'Outfit',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);height:100dvh;overflow:hidden;display:grid;grid-template-rows:52px 1fr}
+header{display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--bd);background:var(--s1);gap:14px;z-index:10}
+.logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;letter-spacing:-.02em}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--acc)}
+.logo-sub{color:var(--txm);font-size:11px;font-weight:400}
+header .sp{flex:1}
+.btn-primary{background:var(--acc);color:#0c0e13;border:none;border-radius:var(--r8);padding:7px 16px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:.01em}
+.btn-primary:hover{opacity:.88}
+.btn-primary:active{transform:scale(.97)}
+.main{display:grid;grid-template-columns:340px 1fr;overflow:hidden}
+/* LEFT */
+.left{border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+.tabs{display:flex;gap:2px;padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--s1);flex-shrink:0}
+.tab{flex:1;background:none;border:1px solid transparent;border-radius:var(--r4);color:var(--txm);font-family:inherit;font-size:11px;font-weight:500;padding:5px 2px;cursor:pointer;transition:all .15s}
+.tab:hover{color:var(--tx)}
+.tab.on{background:var(--acc2);color:var(--acc);border-color:var(--acc3)}
+.scroll{overflow-y:auto;flex:1;padding:12px;display:flex;flex-direction:column;gap:10px}
+.scroll::-webkit-scrollbar{width:3px}
+.scroll::-webkit-scrollbar-thumb{background:var(--bd3);border-radius:4px}
+/* SECTIONS */
+.sec{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r12);overflow:hidden}
+.sec-h{display:flex;align-items:center;padding:11px 13px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--txm);cursor:pointer;user-select:none;gap:6px}
+.sec-h svg{margin-left:auto;transition:transform .2s;flex-shrink:0}
+.sec.on .sec-h svg{transform:rotate(180deg)}
+.sec.on .sec-h{border-bottom:1px solid var(--bd)}
+.sec-b{display:none;padding:13px;gap:11px;flex-direction:column}
+.sec.on .sec-b{display:flex}
+/* PANELS */
+.panel{display:none}
+.panel.on{display:contents}
+/* FORM */
+.f{display:flex;flex-direction:column;gap:5px}
+.f label,.fl{font-size:11px;font-weight:500;color:var(--txm)}
+.f input[type=text],.f input[type=number],.f select,.inp{background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);color:var(--tx);font-family:inherit;font-size:12px;padding:7px 9px;outline:none;transition:border-color .15s;width:100%}
+.f input:focus,.f select:focus,.inp:focus{border-color:var(--acc)}
+.f select option{background:#1c2030}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* COLOR FIELD */
+.cf{display:flex;flex-direction:column;gap:5px}
+.cw{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);padding:5px 9px;transition:border-color .15s;cursor:pointer}
+.cw:focus-within{border-color:var(--acc)}
+.cs{width:18px;height:18px;border-radius:var(--r4);border:1px solid rgba(255,255,255,.12);flex-shrink:0;cursor:pointer;position:relative;overflow:hidden}
+.cs input[type=color]{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;border:none;padding:0}
+.ch{background:none;border:none;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;flex:1;min-width:0}
+/* SLIDER */
+.sf{display:flex;flex-direction:column;gap:5px}
+.slrow{display:flex;justify-content:space-between;align-items:center}
+.slrow label{font-size:11px;font-weight:500;color:var(--txm)}
+.slval{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--acc)}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--acc);cursor:pointer;border:2px solid var(--bg);transition:transform .1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+/* ORNAMENT PICKER */
+.og{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.ob{aspect-ratio:1;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);color:var(--tx);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;font-family:Georgia,serif}
+.ob:hover{border-color:var(--acc3);background:var(--acc2)}
+.ob.on{border-color:var(--acc);background:var(--acc2);color:var(--acc)}
+/* THEME GRID */
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tc{border-radius:var(--r8);overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.tc:hover{transform:translateY(-1px);border-color:var(--bd3)}
+.tc.on{border-color:var(--acc)}
+.tp{height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.tp-orn{font-size:22px;font-family:Georgia,serif;opacity:.45;position:absolute;top:3px;left:50%;transform:translateX(-50%);line-height:1}
+.tp-txt{font-size:9px;font-family:Georgia,serif;font-style:italic;opacity:.8;margin-top:8px}
+.tn{background:rgba(0,0,0,.3);padding:3px 7px;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+/* MODE TOGGLE */
+.mt{display:flex;gap:3px;background:var(--s2);padding:3px;border-radius:var(--r8);margin-bottom:3px}
+.mb{flex:1;background:none;border:none;border-radius:6px;padding:5px;font-family:inherit;font-size:11px;font-weight:500;color:var(--txm);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.mb.on{background:var(--s1);color:var(--tx)}
+/* RIGHT */
+.right{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:24px;padding:28px 24px;overflow-y:auto;background:var(--bg)}
+.pctrl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.cg{display:flex;gap:2px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r8);padding:3px}
+.cb{background:none;border:none;border-radius:6px;padding:5px 11px;font-family:inherit;font-size:11px;font-weight:500;color:var(--txm);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.cb:hover{color:var(--tx)}
+.cb.on{background:var(--s2);color:var(--tx)}
+/* WIDGET STAGE */
+.ws{display:flex;align-items:center;justify-content:center}
+.wp{border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:width .35s cubic-bezier(.34,1.56,.64,1),height .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.05);position:relative}
+.wp.sm{width:165px;height:165px}
+.wp.md{width:355px;height:165px}
+.wp.lg{width:355px;height:355px}
+.wo{text-align:center;line-height:1;font-family:Georgia,serif;transition:all .2s;flex-shrink:0}
+.wt{text-align:center;line-height:1.45;font-family:Georgia,serif;transition:all .2s;flex:1;display:flex;align-items:center;justify-content:center}
+.wti{text-align:center}
+.wd{font-size:9px;font-family:Georgia,serif;font-style:italic}
+/* CODE */
+.co{width:100%;max-width:600px}
+.co-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.co-title{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--txm)}
+.btn-copy{background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);color:var(--txm);font-family:inherit;font-size:11px;font-weight:500;padding:5px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.btn-copy:hover{color:var(--tx);border-color:var(--bd3)}
+.btn-copy.done{color:#4ade80;border-color:#4ade8030;background:#4ade8010}
+.code-ta{width:100%;height:170px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r12);color:var(--txm);font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.65;padding:13px;resize:none;outline:none;transition:border-color .15s}
+.code-ta:focus{border-color:var(--bd3)}
+/* DIVIDER */
+.div{height:1px;background:var(--bd);margin:0 -13px}
+/* BADGE */
+.badge{display:inline-flex;align-items:center;background:var(--acc2);color:var(--acc);border-radius:var(--r4);padding:2px 6px;font-size:10px;font-weight:600}
+/* HINT */
+.hint{font-size:11px;color:var(--txf);line-height:1.5}
+/* GRADIENT PREVIEW BAR */
+.gpb{height:32px;border-radius:var(--r8);border:1px solid var(--bd2);transition:all .3s;margin-top:2px}
+/* CHECKMARK ani */
+@keyframes ck{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.done svg{animation:ck .3s ease}
+/* Subtle fade in */
+.panel.on>*{animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MOBILE ──────────────────────────────── */
+@media (max-width: 700px) {
+  body{
+    height:100dvh;
+    overflow:hidden;
+    grid-template-rows:48px 1fr 56px;
+  }
+  header{
+    padding:0 14px;
+  }
+  .logo-sub{ display:none; }
+  .btn-primary{
+    font-size:11px;
+    padding:6px 12px;
+  }
+  /* Main becomes single full-height column */
+  .main{
+    grid-template-columns:1fr;
+    overflow:hidden;
+    position:relative;
+  }
+  /* Left & right become full-screen swappable panels */
+  .left, .right{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    transition:opacity .2s ease, transform .2s ease;
+    overflow-y:auto;
+    overflow-x:hidden;
+    border:none;
+  }
+  /* Active mobile view */
+  .left{  display:flex; z-index:1; }
+  .right{ display:flex; flex-direction:column; align-items:center; z-index:0; padding:18px 16px; gap:18px; }
+
+  /* Hidden state */
+  .mob-hidden{
+    opacity:0;
+    pointer-events:none;
+    transform:translateX(8px);
+    z-index:0 !important;
+  }
+  /* Shown state */
+  .mob-visible{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateX(0);
+    z-index:1 !important;
+  }
+
+  /* Right panel: code section full width */
+  .co{ width:100%; max-width:100%; }
+  .code-ta{ height:200px; font-size:10px; }
+
+  /* Widget stage doesn't need to center in a giant space */
+  .ws{ width:100%; justify-content:center; }
+
+  /* Tabs in left panel: make touch-friendly */
+  .tabs{ padding:8px 10px; gap:3px; }
+  .tab{ padding:7px 2px; font-size:10.5px; }
+
+  /* Bottom navigation bar */
+  .mob-nav{
+    display:flex;
+    background:var(--s1);
+    border-top:1px solid var(--bd);
+    z-index:100;
+  }
+  .mob-nav-btn{
+    flex:1;
+    background:none;
+    border:none;
+    color:var(--txm);
+    font-family:inherit;
+    font-size:10px;
+    font-weight:500;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:8px 4px;
+    transition:color .15s;
+    letter-spacing:.02em;
+  }
+  .mob-nav-btn svg{ flex-shrink:0; }
+  .mob-nav-btn.on{ color:var(--acc); }
+  .mob-nav-btn.on svg{ stroke:var(--acc); }
+
+  /* Slightly taller touch targets on sliders */
+  input[type=range]{ height:6px; }
+  input[type=range]::-webkit-slider-thumb{ width:18px; height:18px; }
+
+  /* Row grids: keep 2-col but allow wrap on very small screens */
+  .row2{ grid-template-columns:1fr 1fr; }
+  .row3{ grid-template-columns:1fr 1fr 1fr; }
+
+  /* Preview controls wrap nicely */
+  .pctrl{ gap:6px; }
+
+  /* Ornament grid: 8 per row on mobile for more items */
+  .og{ grid-template-columns:repeat(8,1fr); }
+}
+
+/* Hide mob-nav on desktop */
+.mob-nav{ display:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-dot"></div>Widget Builder <span class="logo-sub">Dagelijkse Tekst</span></div>
+  <div class="sp"></div>
+  <button class="btn-primary" id="btnExport" onclick="doExport()">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Exporteer Script
+  </button>
+</header>
+
+<div class="main">
+<!-- LEFT PANEL -->
+<div class="left">
+  <div class="tabs">
+    <button class="tab on" onclick="sw('themes',this)">Thema&apos;s</button>
+    <button class="tab" onclick="sw('colors',this)">Kleuren</button>
+    <button class="tab" onclick="sw('type',this)">Tekst</button>
+    <button class="tab" onclick="sw('orn',this)">Ornament</button>
+    <button class="tab" onclick="sw('misc',this)">Overig</button>
+  </div>
+
+  <div class="scroll">
+
+    <!-- THEMES PANEL -->
+    <div class="panel on" id="pan-themes">
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Preset thema's <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b"><div class="tg" id="themeGrid"></div></div>
+      </div>
+    </div>
+
+    <!-- COLORS PANEL -->
+    <div class="panel" id="pan-colors">
+      <div class="mt">
+        <button class="mb on" id="cml" onclick="setCM('light')">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          Licht modus
+        </button>
+        <button class="mb" id="cmd" onclick="setCM('dark')">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Donker modus
+        </button>
+      </div>
+
+      <div class="sec on" id="cpLight">
+        <div class="sec-h" onclick="tgl(this)">Licht — achtergrond <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="row2">
+            <div class="cf"><label class="fl">Boven (bg1)</label><div class="cw" onclick="pc('lbg1')"><div class="cs" id="sw-lbg1"><input type="color" id="cp-lbg1" oninput="ci('light','bg1',this.value)"></div><input class="ch" id="hx-lbg1" maxlength="7" oninput="hx('light','bg1',this.value)"></div></div>
+            <div class="cf"><label class="fl">Onder (bg2)</label><div class="cw" onclick="pc('lbg2')"><div class="cs" id="sw-lbg2"><input type="color" id="cp-lbg2" oninput="ci('light','bg2',this.value)"></div><input class="ch" id="hx-lbg2" maxlength="7" oninput="hx('light','bg2',this.value)"></div></div>
+          </div>
+          <div class="gpb" id="gpbl"></div>
+          <div class="row2">
+            <div class="cf"><label class="fl">Tekst</label><div class="cw" onclick="pc('ltx')"><div class="cs" id="sw-ltx"><input type="color" id="cp-ltx" oninput="ci('light','text',this.value)"></div><input class="ch" id="hx-ltx" maxlength="7" oninput="hx('light','text',this.value)"></div></div>
+            <div class="cf"><label class="fl">Ornament</label><div class="cw" onclick="pc('lorn')"><div class="cs" id="sw-lorn"><input type="color" id="cp-lorn" oninput="ci('light','ornament',this.value)"></div><input class="ch" id="hx-lorn" maxlength="7" oninput="hx('light','ornament',this.value)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec on" id="cpDark">
+        <div class="sec-h" onclick="tgl(this)">Donker — achtergrond <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="row2">
+            <div class="cf"><label class="fl">Boven (bg1)</label><div class="cw" onclick="pc('dbg1')"><div class="cs" id="sw-dbg1"><input type="color" id="cp-dbg1" oninput="ci('dark','bg1',this.value)"></div><input class="ch" id="hx-dbg1" maxlength="7" oninput="hx('dark','bg1',this.value)"></div></div>
+            <div class="cf"><label class="fl">Onder (bg2)</label><div class="cw" onclick="pc('dbg2')"><div class="cs" id="sw-dbg2"><input type="color" id="cp-dbg2" oninput="ci('dark','bg2',this.value)"></div><input class="ch" id="hx-dbg2" maxlength="7" oninput="hx('dark','bg2',this.value)"></div></div>
+          </div>
+          <div class="gpb" id="gpbd"></div>
+          <div class="row2">
+            <div class="cf"><label class="fl">Tekst</label><div class="cw" onclick="pc('dtx')"><div class="cs" id="sw-dtx"><input type="color" id="cp-dtx" oninput="ci('dark','text',this.value)"></div><input class="ch" id="hx-dtx" maxlength="7" oninput="hx('dark','text',this.value)"></div></div>
+            <div class="cf"><label class="fl">Ornament</label><div class="cw" onclick="pc('dorn')"><div class="cs" id="sw-dorn"><input type="color" id="cp-dorn" oninput="ci('dark','ornament',this.value)"></div><input class="ch" id="hx-dorn" maxlength="7" oninput="hx('dark','ornament',this.value)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Verloop richting <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="f"><label>Richting</label>
+            <select id="selGrad" onchange="S.grad=this.value;up();gen()">
+              <option value="tr">Diagonaal (links-boven → rechts-onder)</option>
+              <option value="b">Verticaal (boven → onder)</option>
+              <option value="r">Horizontaal (links → rechts)</option>
+              <option value="bl">Diagonaal (rechts-boven → links-onder)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TYPE PANEL -->
+    <div class="panel" id="pan-type">
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Lettertype <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="f"><label>Font familie</label>
+            <select id="selFont" onchange="S.font=this.value;up();gen()">
+              <option value="Georgia-Italic">Georgia Italic (standaard)</option>
+              <option value="Georgia">Georgia Regular</option>
+              <option value="TimesNewRomanPS-ItalicMT">Times New Roman Italic</option>
+              <option value="TimesNewRomanPSMT">Times New Roman</option>
+              <option value="Palatino-Italic">Palatino Italic</option>
+              <option value="Palatino-Roman">Palatino Roman</option>
+              <option value="Baskerville-Italic">Baskerville Italic</option>
+              <option value="Baskerville">Baskerville</option>
+              <option value="HelveticaNeue-Light">Helvetica Neue Light</option>
+              <option value="HelveticaNeue">Helvetica Neue</option>
+              <option value="HelveticaNeue-Italic">Helvetica Neue Italic</option>
+              <option value="AvenirNext-Regular">Avenir Next</option>
+              <option value="AvenirNext-Italic">Avenir Next Italic</option>
+              <option value="GillSans-Italic">Gill Sans Italic</option>
+              <option value="GillSans">Gill Sans</option>
+              <option value="Futura-Medium">Futura Medium</option>
+              <option value="Verdana">Verdana</option>
+              <option value="ArialMT">Arial</option>
+              <option value="Noteworthy-Light">Noteworthy Light</option>
+              <option value="SnellRoundhand">Snell Roundhand</option>
+              <option value="MarkerFelt-Thin">Marker Felt</option>
+              <option value="Chalkboard SE">Chalkboard SE</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Lettergroottes per widget <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="row3">
+            <div class="sf"><div class="slrow"><label>Klein</label><span class="slval" id="vfsS">13</span></div><input type="range" min="8" max="20" value="13" oninput="S.fs.s=+this.value;document.getElementById('vfsS').textContent=this.value;up();gen()"></div>
+            <div class="sf"><div class="slrow"><label>Medium</label><span class="slval" id="vfsM">16</span></div><input type="range" min="10" max="26" value="16" oninput="S.fs.m=+this.value;document.getElementById('vfsM').textContent=this.value;up();gen()"></div>
+            <div class="sf"><div class="slrow"><label>Groot</label><span class="slval" id="vfsL">19</span></div><input type="range" min="12" max="30" value="19" oninput="S.fs.l=+this.value;document.getElementById('vfsL').textContent=this.value;up();gen()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Tekstuitlijning &amp; opties <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="sf"><div class="slrow"><label>Min. schaalfactor</label><span class="slval" id="vscale">0.45</span></div><input type="range" min="20" max="95" value="45" oninput="S.scale=+(this.value/100).toFixed(2);document.getElementById('vscale').textContent=S.scale;gen()"></div>
+          <p class="hint">Hoe klein de tekst mag schalen als hij niet past.</p>
+          <div class="f"><label>Regelafstand (preview)</label>
+            <select id="selLH" onchange="S.lh=this.value;up()">
+              <option value="1.35">Compact (1.35)</option>
+              <option value="1.45" selected>Normaal (1.45)</option>
+              <option value="1.6">Ruim (1.6)</option>
+              <option value="1.75">Luchtig (1.75)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORNAMENT PANEL -->
+    <div class="panel" id="pan-orn">
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Ornament karakter <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="og" id="ornGrid"></div>
+          <div class="div"></div>
+          <div class="f"><label>Eigen karakter</label><input type="text" id="custOrn" maxlength="2" placeholder="Typ hier..." style="font-size:18px;text-align:center;font-family:Georgia,serif" oninput="if(this.value){S.orn=this.value[0];document.querySelectorAll('.ob').forEach(b=>b.classList.remove('on'));up();gen()}"></div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Ornament grootte &amp; opaciteit <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="sf"><div class="slrow"><label>Grootte</label><span class="slval" id="vos">52</span></div><input type="range" min="18" max="120" value="52" oninput="S.ornSize=+this.value;document.getElementById('vos').textContent=this.value;up();gen()"></div>
+          <div class="sf"><div class="slrow"><label>Opaciteit</label><span class="slval" id="voo">35%</span></div><input type="range" min="5" max="100" value="35" oninput="S.ornOp=+(this.value/100).toFixed(2);document.getElementById('voo').textContent=this.value+'%';up();gen()"></div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Datum ornament <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="f"><label>Prefix karakter</label><input type="text" id="dateOrn" value="✿" maxlength="2" style="font-size:18px;text-align:center;font-family:Georgia,serif" oninput="S.dateOrn=this.value||'✿';up();gen()"></div>
+          <div class="sf"><div class="slrow"><label>Datum opaciteit</label><span class="slval" id="vdo">55%</span></div><input type="range" min="10" max="100" value="55" oninput="S.dateOp=+(this.value/100).toFixed(2);document.getElementById('vdo').textContent=this.value+'%';up();gen()"></div>
+          <div class="sf"><div class="slrow"><label>Datum lettergrootte</label><span class="slval" id="vdfs">9</span></div><input type="range" min="7" max="14" value="9" oninput="S.dateFs=+this.value;document.getElementById('vdfs').textContent=this.value;up();gen()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISC PANEL -->
+    <div class="panel" id="pan-misc">
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">JW.org instellingen <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="row2">
+            <div class="f"><label>Taal (wtLocale)</label>
+              <select id="selLocale" onchange="S.locale=this.value;gen()">
+                <option value="o">Nederlands (o)</option>
+                <option value="e">Engels (e)</option>
+                <option value="s">Spaans (s)</option>
+                <option value="f">Frans (f)</option>
+                <option value="g">Duits (g)</option>
+                <option value="p">Portugees (p)</option>
+                <option value="it">Italiaans (it)</option>
+                <option value="j">Japans (j)</option>
+                <option value="ko">Koreaans (ko)</option>
+                <option value="z">Chinees (z)</option>
+                <option value="t">Tsjechisch (t)</option>
+                <option value="pol">Pools (pol)</option>
+                <option value="ru">Russisch (ru)</option>
+              </select>
+            </div>
+            <div class="f"><label>rsconf</label><input type="text" id="inRs" value="18" maxlength="4" oninput="S.rsconf=this.value;gen()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Widget padding &amp; stijl <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="sf"><div class="slrow"><label>Padding (rondom)</label><span class="slval" id="vpad">14</span></div><input type="range" min="6" max="26" value="14" oninput="S.pad=+this.value;document.getElementById('vpad').textContent=this.value;up();gen()"></div>
+          <div class="sf"><div class="slrow"><label>Ruimte boven tekst</label><span class="slval" id="vtsp">2</span></div><input type="range" min="0" max="14" value="2" oninput="S.tsp=+this.value;document.getElementById('vtsp').textContent=this.value;up();gen()"></div>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Voorbeeld tekst <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="f"><label>Tekst voor preview</label><input type="text" id="prvTxt" value="Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4" oninput="up()"></div>
+          <p class="hint">Alleen voor de live preview. Het echte script haalt tekst op van JW.org.</p>
+        </div>
+      </div>
+
+      <div class="sec on">
+        <div class="sec-h" onclick="tgl(this)">Scriptable icon <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="sec-b">
+          <div class="row2">
+            <div class="f"><label>Icon kleur</label>
+              <select id="selIconClr">
+                <option value="brown" selected>Brown</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+                <option value="red">Red</option>
+                <option value="orange">Orange</option>
+                <option value="yellow">Yellow</option>
+                <option value="pink">Pink</option>
+                <option value="purple">Purple</option>
+                <option value="gray">Gray</option>
+                <option value="white">White</option>
+              </select>
+            </div>
+            <div class="f"><label>Icon glyph</label>
+              <select id="selIconGl">
+                <option value="book-open" selected>book-open</option>
+                <option value="bible">bible</option>
+                <option value="cross">cross</option>
+                <option value="dove">dove</option>
+                <option value="star">star</option>
+                <option value="heart">heart</option>
+                <option value="sun">sun</option>
+                <option value="moon">moon</option>
+                <option value="leaf">leaf</option>
+                <option value="feather-alt">feather-alt</option>
+                <option value="praying-hands">praying-hands</option>
+                <option value="church">church</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+</div><!-- /left -->
+
+<!-- RIGHT PANEL -->
+<div class="right">
+  <div class="pctrl">
+    <div class="cg" id="cgSize">
+      <button class="cb on" onclick="sz('sm',this)">Klein</button>
+      <button class="cb" onclick="sz('md',this)">Medium</button>
+      <button class="cb" onclick="sz('lg',this)">Groot</button>
+    </div>
+    <div class="cg" id="cgMode">
+      <button class="cb on" onclick="md('light',this)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        Licht
+      </button>
+      <button class="cb" onclick="md('dark',this)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Donker
+      </button>
+    </div>
+  </div>
+
+  <div class="ws">
+    <div class="wp sm" id="wPreview" style="padding:14px 16px">
+      <div style="display:flex;justify-content:center;flex-shrink:0">
+        <div class="wo" id="pOrn" style="font-size:52px;opacity:.35">&ldquo;</div>
+      </div>
+      <div style="flex:0 0 2px"></div>
+      <div class="wt" id="pTxt"><div class="wti" id="pTxtInner" style="font-size:13px;font-style:italic">Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4</div></div>
+      <div style="display:flex;justify-content:flex-end;flex-shrink:0">
+        <div class="wd" id="pDate" style="opacity:.55">✿  18 apr 2025</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="co">
+    <div class="co-hdr">
+      <span class="co-title">Gegenereerde script</span>
+      <button class="btn-copy" id="btnCopy" onclick="copyCode()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Kopieer
+      </button>
+    </div>
+    <textarea class="code-ta" id="codeOut" readonly></textarea>
+  </div>
+</div><!-- /right -->
+</div><!-- /main -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-btn on" id="mn-settings" onclick="mobTab('settings')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Instellingen
+  </button>
+  <button class="mob-nav-btn" id="mn-preview" onclick="mobTab('preview')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    Preview
+  </button>
+  <button class="mob-nav-btn" id="mn-code" onclick="mobTab('code')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    Script
+  </button>
+</nav>
+
+<script>
+// ── STATE ──────────────────────────────────
+const S={
+  colors:{
+    light:{bg1:'#b8c8db',bg2:'#a89480',text:'#f5f0ea',ornament:'#e8ddd0'},
+    dark: {bg1:'#2a3348',bg2:'#3d2e24',text:'#f0ece6',ornament:'#c8b89a'}
+  },
+  grad:'tr',font:'Georgia-Italic',
+  fs:{s:13,m:16,l:19},scale:.45,lh:'1.45',
+  orn:'\u201C',ornSize:52,ornOp:.35,
+  dateOrn:'✿',dateOp:.55,dateFs:9,
+  pad:14,tsp:2,
+  locale:'o',rsconf:'18'
+};
+let pSize='sm',pMode='light';
+
+// ── PRESETS ────────────────────────────────
+const PRESETS=[
+  {id:'orig',name:'Origineel',
+   light:{bg1:'#b8c8db',bg2:'#a89480',text:'#f5f0ea',ornament:'#e8ddd0'},
+   dark: {bg1:'#2a3348',bg2:'#3d2e24',text:'#f0ece6',ornament:'#c8b89a'}},
+  {id:'mid',name:'Middernacht',
+   light:{bg1:'#bec8e0',bg2:'#8090a8',text:'#f8f6f4',ornament:'#dde4f0'},
+   dark: {bg1:'#0e1525',bg2:'#1a1a2e',text:'#e8e4fc',ornament:'#7080c0'}},
+  {id:'sun',name:'Zonsondergang',
+   light:{bg1:'#e8c4a0',bg2:'#d47858',text:'#fdf8f2',ornament:'#f8e4d0'},
+   dark: {bg1:'#3d1a10',bg2:'#5c2820',text:'#f9ede0',ornament:'#e8a070'}},
+  {id:'for',name:'Woud',
+   light:{bg1:'#a8c4a0',bg2:'#607848',text:'#f8f6f0',ornament:'#d8e8c8'},
+   dark: {bg1:'#162010',bg2:'#243018',text:'#e4f0dc',ornament:'#88b870'}},
+  {id:'arc',name:'Poolijs',
+   light:{bg1:'#c0e0f4',bg2:'#88b8d8',text:'#f0f8ff',ornament:'#dceeff'},
+   dark: {bg1:'#101c28',bg2:'#183048',text:'#e8f4ff',ornament:'#80b8e0'}},
+  {id:'sak',name:'Sakura',
+   light:{bg1:'#f0c8d0',bg2:'#d8a0a8',text:'#fff0f2',ornament:'#fce8ec'},
+   dark: {bg1:'#280c14',bg2:'#3c1820',text:'#fce8ec',ornament:'#e090a0'}},
+  {id:'par',name:'Perkament',
+   light:{bg1:'#e8d8b8',bg2:'#c8b090',text:'#3a2c18',ornament:'#7a5830'},
+   dark: {bg1:'#2a2010',bg2:'#3a2c18',text:'#e8d8b8',ornament:'#c8a860'}},
+  {id:'ame',name:'Amethist',
+   light:{bg1:'#c8b8e0',bg2:'#a890c8',text:'#faf8ff',ornament:'#e8e0f8'},
+   dark: {bg1:'#1a1028',bg2:'#28183c',text:'#f0e8ff',ornament:'#a080d0'}},
+  {id:'ros',name:'Roségoud',
+   light:{bg1:'#e8c8c0',bg2:'#c8a898',text:'#fff4f2',ornament:'#f0d8d0'},
+   dark: {bg1:'#2c1810',bg2:'#3c2018',text:'#f8e8e0',ornament:'#d09080'}},
+  {id:'tea',name:'Theegroen',
+   light:{bg1:'#b8d0c0',bg2:'#90b098',text:'#f4faf4',ornament:'#d4e8d8'},
+   dark: {bg1:'#102018',bg2:'#182c20',text:'#d8f0e0',ornament:'#70a880'}},
+];
+
+// ── ORNAMENTS ──────────────────────────────
+const ORNS=['\u201C','\u2018','\u275D','\u2767','\u2741','\u2740','\u273F','\u2736','\u2727','\u2606','\u2712','\u2042','\u00A7','\u00B6','\u2666','\u2660','\u2663'];
+
+// ── INIT ───────────────────────────────────
+function init(){
+  buildThemes();
+  buildOrns();
+  syncColors();
+  up();
+  gen();
+}
+
+function buildThemes(){
+  const g=document.getElementById('themeGrid');
+  PRESETS.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='tc'+(i===0?' on':'');
+    d.id='tc-'+p.id;
+    d.onclick=()=>applyPreset(p);
+    d.innerHTML=`<div class="tp" style="background:linear-gradient(135deg,${p.light.bg1},${p.light.bg2})"><div class="tp-orn" style="color:${p.light.ornament}">\u201C</div><div class="tp-txt" style="color:${p.light.text}">${p.name}</div></div><div class="tn">${p.name}</div>`;
+    g.appendChild(d);
+  });
+}
+
+function buildOrns(){
+  const g=document.getElementById('ornGrid');
+  ORNS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='ob'+(c===S.orn?' on':'');
+    b.textContent=c;
+    b.title='U+'+c.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
+    b.onclick=()=>{
+      document.querySelectorAll('.ob').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      S.orn=c;
+      document.getElementById('custOrn').value='';
+      up();gen();
+    };
+    g.appendChild(b);
+  });
+}
+
+function applyPreset(p){
+  S.colors.light={...p.light};
+  S.colors.dark={...p.dark};
+  document.querySelectorAll('.tc').forEach(x=>x.classList.remove('on'));
+  document.getElementById('tc-'+p.id).classList.add('on');
+  syncColors();up();gen();
+}
+
+// ── COLOR SYNC ─────────────────────────────
+function syncColors(){
+  [['light','bg1','lbg1'],['light','bg2','lbg2'],['light','text','ltx'],['light','ornament','lorn'],
+   ['dark','bg1','dbg1'],['dark','bg2','dbg2'],['dark','text','dtx'],['dark','ornament','dorn']].forEach(([m,k,id])=>{
+    const v=S.colors[m][k];
+    const sw=document.getElementById('sw-'+id);
+    const hx=document.getElementById('hx-'+id);
+    const cp=document.getElementById('cp-'+id);
+    if(sw)sw.style.background=v;
+    if(hx)hx.value=v;
+    if(cp)cp.value=v;
+  });
+  updGPB();
+}
+
+function updGPB(){
+  const gl=document.getElementById('gpbl');
+  const gd=document.getElementById('gpbd');
+  const dir=cssDir(S.grad);
+  if(gl)gl.style.background=`linear-gradient(${dir},${S.colors.light.bg1},${S.colors.light.bg2})`;
+  if(gd)gd.style.background=`linear-gradient(${dir},${S.colors.dark.bg1},${S.colors.dark.bg2})`;
+}
+
+function pc(id){document.getElementById('cp-'+id).click()}
+function ci(mode,key,val){
+  S.colors[mode][key]=val;
+  document.getElementById('hx-'+(mode[0]+key.replace('ornament','orn').replace('text','tx').replace('bg1','bg1').replace('bg2','bg2'))).value=val;
+  document.getElementById('sw-'+(mode[0]+key.replace('ornament','orn').replace('text','tx').replace('bg1','bg1').replace('bg2','bg2'))).style.background=val;
+  updGPB();up();gen();
+}
+function hx(mode,key,val){
+  if(!/^#[0-9a-fA-F]{6}$/.test(val))return;
+  const sid=mode[0]+key.replace('ornament','orn').replace('text','tx');
+  S.colors[mode][key]=val;
+  document.getElementById('sw-'+sid).style.background=val;
+  document.getElementById('cp-'+sid).value=val;
+  updGPB();up();gen();
+}
+
+// ── CSS GRAD DIR ───────────────────────────
+function cssDir(d){
+  return{tr:'to bottom right',b:'to bottom',r:'to right',bl:'to bottom left'}[d]||'to bottom right';
+}
+
+// ── PREVIEW ────────────────────────────────
+const FMAP={
+  'Georgia-Italic':['Georgia',true],'Georgia':['Georgia',false],
+  'TimesNewRomanPS-ItalicMT':['Times New Roman',true],'TimesNewRomanPSMT':['Times New Roman',false],
+  'Palatino-Italic':['Palatino Linotype,Palatino',true],'Palatino-Roman':['Palatino Linotype,Palatino',false],
+  'Baskerville-Italic':['Baskerville Old Face,Garamond',true],'Baskerville':['Baskerville Old Face,Garamond',false],
+  'HelveticaNeue-Light':['Helvetica Neue,Arial',false],'HelveticaNeue':['Helvetica Neue,Arial',false],'HelveticaNeue-Italic':['Helvetica Neue,Arial',true],
+  'AvenirNext-Regular':['Avenir Next,Avenir,sans-serif',false],'AvenirNext-Italic':['Avenir Next,Avenir,sans-serif',true],
+  'GillSans-Italic':['Gill Sans MT,Calibri,sans-serif',true],'GillSans':['Gill Sans MT,Calibri,sans-serif',false],
+  'Futura-Medium':['Century Gothic,sans-serif',false],
+  'Verdana':['Verdana,Geneva,sans-serif',false],'ArialMT':['Arial,sans-serif',false],
+  'Noteworthy-Light':['Noteworthy,Chalkboard SE,sans-serif',false],
+  'SnellRoundhand':['Brush Script MT,cursive',true],
+  'MarkerFelt-Thin':['Marker Felt,sans-serif',false],
+  'Chalkboard SE':['Chalkboard SE,Comic Sans MS,sans-serif',false]
+};
+
+function up(){
+  const m=S.colors[pMode];
+  const w=document.getElementById('wPreview');
+  w.style.background=`linear-gradient(${cssDir(S.grad)},${m.bg1},${m.bg2})`;
+  w.style.padding=`${S.pad}px ${S.pad+2}px`;
+
+  const orn=document.getElementById('pOrn');
+  orn.textContent=S.orn;
+  orn.style.fontSize=S.ornSize+'px';
+  orn.style.color=m.ornament;
+  orn.style.opacity=S.ornOp;
+
+  const fs=pSize==='sm'?S.fs.s:pSize==='lg'?S.fs.l:S.fs.m;
+  const ti=document.getElementById('pTxtInner');
+  ti.style.fontSize=fs+'px';
+  ti.style.color=m.text;
+  ti.style.lineHeight=S.lh;
+
+  const ff=FMAP[S.font]||['Georgia',true];
+  ti.style.fontFamily=ff[0];
+  ti.style.fontStyle=ff[1]?'italic':'normal';
+
+  const txt=document.getElementById('prvTxt').value||'Maak mij uw wegen bekend, Jehovah, leer mij uw paden — Psalm 25:4';
+  ti.textContent=txt;
+
+  const today=new Date();
+  const mn=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const dt=document.getElementById('pDate');
+  dt.textContent=`${S.dateOrn}  ${today.getDate()} ${mn[today.getMonth()]} ${today.getFullYear()}`;
+  dt.style.color=m.ornament;
+  dt.style.opacity=S.dateOp;
+  dt.style.fontSize=S.dateFs+'px';
+
+  const sp=document.getElementById('wPreview').children[1];
+  if(sp)sp.style.height=S.tsp+'px';
+}
+
+// ── CONTROLS ───────────────────────────────
+function sz(s,btn){
+  pSize=s;
+  const w=document.getElementById('wPreview');
+  w.className='wp '+s;
+  document.querySelectorAll('#cgSize .cb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  up();
+}
+function md(m,btn){
+  pMode=m;
+  document.querySelectorAll('#cgMode .cb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  up();
+}
+
+// ── TABS ───────────────────────────────────
+const PTABS=['themes','colors','type','orn','misc'];
+function sw(id,btn){
+  PTABS.forEach(t=>{
+    document.getElementById('pan-'+t).classList.remove('on');
+  });
+  document.getElementById('pan-'+id).classList.add('on');
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function tgl(hdr){
+  hdr.parentElement.classList.toggle('on');
+}
+
+function setCM(m){
+  document.getElementById('cml').classList.toggle('on',m==='light');
+  document.getElementById('cmd').classList.toggle('on',m==='dark');
+  document.getElementById('cpLight').style.display=m==='light'?'':'none';
+  document.getElementById('cpDark').style.display=m==='dark'?'':'none';
+}
+
+// ── CODE GEN ───────────────────────────────
+function gen(){
+  const lc=document.getElementById('selLocale').value;
+  const rs=document.getElementById('inRs').value;
+  const ic=document.getElementById('selIconClr').value;
+  const ig=document.getElementById('selIconGl').value;
+  const dateOrn=document.getElementById('dateOrn').value||'✿';
+
+  const gradPts={
+    tr:'{sp:new Point(0,0),ep:new Point(1,1)}',
+    b: '{sp:new Point(0.5,0),ep:new Point(0.5,1)}',
+    r: '{sp:new Point(0,0.5),ep:new Point(1,0.5)}',
+    bl:'{sp:new Point(1,0),ep:new Point(0,1)}'
+  }[S.grad];
+
+  const spStart=S.grad==='tr'?'new Point(0, 0)':S.grad==='b'?'new Point(0.5, 0)':S.grad==='r'?'new Point(0, 0.5)':'new Point(1, 0)';
+  const spEnd  =S.grad==='tr'?'new Point(1, 1)':S.grad==='b'?'new Point(0.5, 1)':S.grad==='r'?'new Point(1, 0.5)':'new Point(0, 1)';
+  const ornHex=S.orn.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
+  const dateHex=dateOrn.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
+
+  const c=`// Variables used by Scriptable.
+// icon-color: ${ic}; icon-glyph: ${ig};
+// Gegenereerd door Widget Builder
+
+const cfg = {
+  wtLocale: '${lc}',
+  rsconf: '${rs}',
+
+  fontName: "${S.font}",
+  fontSizeLarge:  ${S.fs.l},
+  fontSizeMedium: ${S.fs.m},
+  fontSizeSmall:  ${S.fs.s},
+
+  ornamentChar:    "\\u${ornHex}",
+  ornamentSize:    ${S.ornSize},
+  ornamentOpacity: ${S.ornOp},
+
+  dateOrnament:    "\\u${dateHex}",
+  dateOpacity:     ${S.dateOp},
+  dateFontSize:    ${S.dateFs},
+
+  widgetPadding:   ${S.pad},
+  topSpacer:       ${S.tsp},
+  minScale:        ${S.scale},
+
+  light: {
+    bg1:      new Color("${S.colors.light.bg1}"),
+    bg2:      new Color("${S.colors.light.bg2}"),
+    text:     new Color("${S.colors.light.text}"),
+    ornament: new Color("${S.colors.light.ornament}"),
+  },
+  dark: {
+    bg1:      new Color("${S.colors.dark.bg1}"),
+    bg2:      new Color("${S.colors.dark.bg2}"),
+    text:     new Color("${S.colors.dark.text}"),
+    ornament: new Color("${S.colors.dark.ornament}"),
+  },
+};
+
+const date    = new Date();
+const dateStr = \`\${date.getFullYear()}\${pad(date.getMonth()+1)}\${pad(date.getDate())}\`;
+const jwUrl   = \`https://www.jw.org/finder?srcid=jwlshare&wtlocale=\${cfg.wtLocale.toUpperCase()}&prefer=lang&alias=daily-text&date=\${dateStr}\`;
+
+const item   = await loadText();
+const widget = createWidget(item);
+
+if (config.runsInWidget) {
+  Script.setWidget(widget);
+  Script.complete();
+} else {
+  Safari.open(jwUrl);
+}
+
+function createWidget(item) {
+  const scripture = extractScripture(item);
+  const w = new ListWidget();
+  w.url = jwUrl;
+  w.setPadding(cfg.widgetPadding, cfg.widgetPadding + 2, cfg.widgetPadding, cfg.widgetPadding + 2);
+
+  const g = new LinearGradient();
+  g.startPoint = ${spStart};
+  g.endPoint   = ${spEnd};
+  g.colors     = [
+    Color.dynamic(cfg.light.bg1, cfg.dark.bg1),
+    Color.dynamic(cfg.light.bg2, cfg.dark.bg2),
+  ];
+  g.locations  = [0, 1];
+  w.backgroundGradient = g;
+
+  const ornamentColor = Color.dynamic(cfg.light.ornament, cfg.dark.ornament);
+
+  const topRow = w.addStack();
+  topRow.layoutHorizontally();
+  topRow.addSpacer();
+  const orn = topRow.addText(cfg.ornamentChar);
+  orn.font        = new Font("Georgia", cfg.ornamentSize);
+  orn.textColor   = ornamentColor;
+  orn.textOpacity = cfg.ornamentOpacity;
+  topRow.addSpacer();
+
+  w.addSpacer(cfg.topSpacer);
+
+  const fontSize = config.widgetFamily === "small"
+    ? cfg.fontSizeSmall
+    : config.widgetFamily === "large"
+    ? cfg.fontSizeLarge
+    : cfg.fontSizeMedium;
+
+  const txt = w.addText(scripture);
+  txt.font               = new Font(cfg.fontName, fontSize);
+  txt.textColor          = Color.dynamic(cfg.light.text, cfg.dark.text);
+  txt.centerAlignText();
+  txt.minimumScaleFactor = cfg.minScale;
+  txt.lineLimit          = 0;
+
+  w.addSpacer();
+
+  const bottomRow = w.addStack();
+  bottomRow.layoutHorizontally();
+  bottomRow.addSpacer();
+  const datumTxt = bottomRow.addText(\`\${cfg.dateOrnament}  \${formatDate(date)}\`);
+  datumTxt.font        = new Font("Georgia-Italic", cfg.dateFontSize);
+  datumTxt.textColor   = ornamentColor;
+  datumTxt.textOpacity = cfg.dateOpacity;
+
+  return w;
+}
+
+async function loadText() {
+  try {
+    const url = \`https://wol.jw.org/wol/dt/r\${cfg.rsconf}/lp-\${cfg.wtLocale.toLowerCase()}/\${date.getFullYear()}/\${pad(date.getMonth()+1)}/\${pad(date.getDate())}\`;
+    const req = new Request(url);
+    const json = await req.loadJSON();
+    return json.items[0];
+  } catch(e) { return null; }
+}
+
+function extractScripture(item) {
+  if (!item) return "Tekst kon niet worden geladen.";
+  const html    = item.content || "";
+  const regex   = /<p[^>]*>(.*?)<\\/p>/s;
+  const matches = html.match(regex);
+  const raw     = (matches && matches[1]) ? matches[1] : "Geen tekst gevonden.";
+  return raw.replace(/<[^>]*>/gm, '').trim();
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function formatDate(d) {
+  const m = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+  return \`\${d.getDate()} \${m[d.getMonth()]} \${d.getFullYear()}\`;
+}`;
+
+  document.getElementById('codeOut').value=c;
+}
+
+function copyCode(){
+  const code=document.getElementById('codeOut').value;
+  navigator.clipboard.writeText(code).then(()=>{
+    const btn=document.getElementById('btnCopy');
+    btn.classList.add('done');
+    btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Gekopieerd!';
+    setTimeout(()=>{
+      btn.classList.remove('done');
+      btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Kopieer';
+    },2500);
+  });
+}
+
+function doExport(){
+  gen();
+  const code=document.getElementById('codeOut').value;
+  const blob=new Blob([code],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='DagelijkseTekst.js';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  const btn=document.getElementById('btnExport');
+  btn.textContent='Gedownload!';
+  setTimeout(()=>btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exporteer Script',2500);
+}
+
+init();
+
+// ── MOBILE NAV ─────────────────────────────
+(function(){
+  const isMobile = () => window.innerWidth <= 700;
+
+  // Elements
+  const leftEl  = document.querySelector('.left');
+  const rightEl = document.querySelector('.right');
+  const coEl    = document.querySelector('.co');
+  const wsEl    = document.querySelector('.ws');
+  const pctrlEl = document.querySelector('.pctrl');
+
+  let current = 'settings';
+
+  function applyView(tab){
+    current = tab;
+    if (!isMobile()) {
+      // Desktop: reset everything
+      leftEl.classList.remove('mob-hidden','mob-visible');
+      rightEl.classList.remove('mob-hidden','mob-visible');
+      coEl.style.display = '';
+      wsEl.style.display = '';
+      pctrlEl.style.display = '';
+      return;
+    }
+
+    // Update nav buttons
+    ['settings','preview','code'].forEach(t => {
+      document.getElementById('mn-'+t).classList.toggle('on', t===tab);
+    });
+
+    if (tab === 'settings') {
+      leftEl.classList.add('mob-visible');
+      leftEl.classList.remove('mob-hidden');
+      rightEl.classList.add('mob-hidden');
+      rightEl.classList.remove('mob-visible');
+    } else {
+      leftEl.classList.add('mob-hidden');
+      leftEl.classList.remove('mob-visible');
+      rightEl.classList.add('mob-visible');
+      rightEl.classList.remove('mob-hidden');
+      // Show/hide sub-sections within right panel
+      wsEl.style.display    = (tab === 'preview') ? 'flex' : 'none';
+      pctrlEl.style.display = (tab === 'preview') ? 'flex' : 'none';
+      coEl.style.display    = (tab === 'code')    ? 'block': 'none';
+    }
+  }
+
+  window.mobTab = function(tab){ applyView(tab); };
+
+  // On resize switch back to desktop layout if needed
+  window.addEventListener('resize', () => {
+    if (!isMobile()) applyView(current);
+    else applyView(current);
+  });
+
+  // Init on load
+  if (isMobile()) applyView('settings');
+})();
+</script>
+</body>
+</html>
